@@ -11,5 +11,6 @@ require (
 	github.com/sirupsen/logrus v1.4.2
 	google.golang.org/grpc v1.22.0
 	gopkg.in/birkirb/loggers.v1 v1.1.0
+	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 	mellium.im/sasl v0.2.1 // indirect
 )
