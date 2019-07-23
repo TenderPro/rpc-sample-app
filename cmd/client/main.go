@@ -1,10 +1,10 @@
 package main
 
 import (
+	api "companyserv/grpccompanyserv"
 	"context"
 	"google.golang.org/grpc"
 	"log"
-	api "companyserv/grpccompanyserv"
 	"time"
 )
 
@@ -21,7 +21,9 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	r, err := c.GetCUsersByIDs(ctx, &api.GetCUsersByIDsRequest{CompanyUserIds: []int64{1}})
+	//	r, err := c.GetCUsersByIDs(ctx, &api.GetCUsersByIDsRequest{CompanyUserIds: []int64{1}})
+
+	r, err := c.CreateCompany(ctx, &api.CreateCompanyRequest{Name: "a3", Title: "aaМащА«2»"})
 	if err != nil {
 		log.Fatalf("could not greet: %v", err)
 	}
