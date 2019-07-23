@@ -12,7 +12,7 @@ APP_LISTEN    ?=
 PGHOST        ?= localhost
 PGPORT        ?= 5432
 PGDATABASE    ?= $(PRG)
-PGUSER        ?= $(PRG)
+PGUSER        ?= ma
 PGPASSWORD    ?= $(shell < /dev/urandom tr -dc A-Za-z0-9 | head -c14; echo)
 PGAPPNAME     ?= $(PRG)
 
@@ -83,8 +83,9 @@ build_client: dep api ## Build the binary file for client
 	@go build -i -v -o $(CLIENT_OUT) $(CLIENT_PKG_BUILD)
 
 run: build_server
-	PGHOST=${PGHOST} PGDATABASE=${PGDATABASE} PGUSER=${PGUSER} PGPASSWORD=${PGPASSWORD} \
-	./$(SERVER_OUT) --debug
+	./$(SERVER_OUT) --debug \
+	PGHOST=${PGHOST} \
+	--db.name=${PGDATABASE} --db.user=${PGUSER} --db.password=${PGPASSWORD}
 
 lint: ## run linter
 	@golangci-lint run ./...
@@ -121,6 +122,10 @@ psql: docker-wait
 
 psql-local: docker-wait
 	@psql -d "postgres://$$PGUSER:$$PGPASSWORD@/$$PGDATABASE?sslmode=disable"
+
+# временно добавлен для проверки применимости
+xo:
+	xo "pgsql://$$PGUSER:$$PGPASSWORD@$$PGHOST/$$PGDATABASE?sslmode=disable" -o models
 
 # ------------------------------------------------------------------------------
 
