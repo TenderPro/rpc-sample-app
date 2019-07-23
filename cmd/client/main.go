@@ -4,11 +4,11 @@ import (
 	"context"
 	"google.golang.org/grpc"
 	"log"
-	api "mlnagents/grpccompanyserv"
+	api "companyserv/grpccompanyserv"
 	"time"
 )
 
-const address = "localhost:7777"
+const address = "localhost:7070"
 
 func main() {
 	conn, err := grpc.Dial(address, grpc.WithInsecure())

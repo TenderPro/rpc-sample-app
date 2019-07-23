@@ -1,28 +1,43 @@
 package main
 
 import (
-	"fmt"
-	"google.golang.org/grpc"
 	"log"
-	api "mlnagents/grpccompanyserv"
-	"net"
+	"os"
 )
 
-// main start a gRPC server and waits for connection
+// Actual version value will be set at build time
+var version = "0.0-dev"
+
 func main() {
-	// create a listener on TCP port 7777
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", 7777))
+	run(os.Exit)
+}
+
+func run(exitFunc func(code int)) {
+	log.Printf(" grpcsample%s. Company service", version)
+	var err error
+	var cfg *Config
+	defer func() { shutdown(exitFunc, err) }()
+	cfg, err = setupConfig()
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		return
 	}
-	// create a server instance
-	s := api.CompanyServer{}
-	// create a gRPC server object
-	grpcServer := grpc.NewServer()
-	// attach the Ping service to the server
-	api.RegisterCompanyServiceServer(grpcServer, &s)
-	// start the server
-	if err := grpcServer.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %s", err)
+	l := setupLog(cfg)
+	serve(cfg, l)
+}
+
+// exit after deferred cleanups have run
+func shutdown(exitFunc func(code int), e error) {
+	if e != nil {
+		var code int
+		switch e {
+		case ErrGotHelp:
+			code = 3
+		case ErrBadArgs:
+			code = 2
+		default:
+			code = 1
+			log.Printf("Run error: %s", e.Error())
+		}
+		exitFunc(code)
 	}
 }
