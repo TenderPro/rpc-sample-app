@@ -2,11 +2,13 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"net"
 
 	"google.golang.org/grpc"
 
-	"github.com/go-pg/pg"
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/postgres"
 
 	"github.com/jessevdk/go-flags"
 
@@ -23,9 +25,7 @@ type DBConfig struct {
 	User     string `long:"user" description:"User name"`
 	Password string `long:"password" description:"User password"`
 	Database string `long:"name" description:"Database name"`
-	// ApplicationName is the application name. Used in logs on Pg side.
-	// Only available from pg-9.0.
-	ApplicationName string `long:"app" default:"companyserv" description:"Application name"`
+	Options  string `long:"opts" default:"sslmode=disable" description:"Database options"`
 }
 
 // Config holds all config vars
@@ -76,16 +76,18 @@ func setupLog(cfg *Config) loggers.Contextual {
 
 // setupRouter creates gin router
 func serve(cfg *Config, log loggers.Contextual) {
-
-	dbcfg := &pg.Options{
-		Addr:            cfg.DB.Addr,
-		User:            cfg.DB.User,
-		Password:        cfg.DB.Password,
-		Database:        cfg.DB.Database,
-		ApplicationName: cfg.DB.ApplicationName,
+	url := fmt.Sprintf("postgres://%s:%s@%s/%s?%s",
+		cfg.DB.User,
+		cfg.DB.Password,
+		cfg.DB.Addr,
+		cfg.DB.Database,
+		cfg.DB.Options,
+	)
+	log.Debugf("Connect: %s", url)
+	db, err := gorm.Open("postgres", url)
+	if err != nil {
+		log.Fatalf("failed to connect: %v", err)
 	}
-	log.Debugf("%+v", dbcfg)
-	db := pg.Connect(dbcfg)
 	defer db.Close()
 
 	// create a listener on TCP port
