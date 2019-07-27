@@ -50,7 +50,7 @@ func (ss *ServerSuite) xTestCreateCompany() {
 
 }
 
-func (ss *ServerSuite) TestGetCompanyIDs() {
+func (ss *ServerSuite) xTestGetCompanyIDs() {
 	req := &api.GetCompanyIDsRequest{
 		Page:          2, // начинаем с 0
 		PerPage:       2,
@@ -69,4 +69,13 @@ func (ss *ServerSuite) TestGetCompanyIDs() {
 
 	assert.NotEqual(ss.T(), 0, len(r.CompanyIds))
 	log.Printf("IDS: %+v", r.CompanyIds)
+}
+
+func (ss *ServerSuite) TestGetCompaniesByIDs() {
+	r, err := ss.srv.GetCompaniesByIDs(ss.ctx, &api.GetCompaniesByIDsRequest{CompanyIds: []int64{32, 7}})
+	require.Nil(ss.T(), err)
+	assert.NotEqual(ss.T(), 0, len(r.Companies))
+	for k, v := range r.Companies {
+		log.Printf("ID %d: %v", k, v)
+	}
 }
