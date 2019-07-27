@@ -90,6 +90,8 @@ run: build_server
 lint: ## run linter
 	@golangci-lint run ./...
 
+test: ## run grpc client tests
+	go test -v -count=1 .
 
 # ------------------------------------------------------------------------------
 # DB operations (with docker)
