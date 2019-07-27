@@ -71,11 +71,18 @@ func (ss *ServerSuite) xTestGetCompanyIDs() {
 	log.Printf("IDS: %+v", r.CompanyIds)
 }
 
-func (ss *ServerSuite) TestGetCompaniesByIDs() {
+func (ss *ServerSuite) xTestGetCompaniesByIDs() {
 	r, err := ss.srv.GetCompaniesByIDs(ss.ctx, &api.GetCompaniesByIDsRequest{CompanyIds: []int64{32, 7}})
 	require.Nil(ss.T(), err)
 	assert.NotEqual(ss.T(), 0, len(r.Companies))
 	for k, v := range r.Companies {
 		log.Printf("ID %d: %v", k, v)
 	}
+}
+
+func (ss *ServerSuite) TestAddUserToCompany() {
+	r, err := ss.srv.AddUserToCompany(ss.ctx, &api.AddUserToCompanyRequest{UserId: -1, CompanyId: 32})
+	require.Nil(ss.T(), err)
+	assert.NotEqual(ss.T(), 0, r.CompanyUserId)
+
 }

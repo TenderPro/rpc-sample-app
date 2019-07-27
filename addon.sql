@@ -1,0 +1,3 @@
+ALTER TABLE company_users ALTER COLUMN status SET DEFAULT 0;
+
+INSERT INTO users VALUES (-1);
