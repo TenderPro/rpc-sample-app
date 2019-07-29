@@ -101,7 +101,7 @@ func (ss *ServerSuite) xTestSwitchCUserStatus() {
 	assert.Equal(ss.T(), int32(0), r.ErrorCode)
 }
 
-func (ss *ServerSuite) TestGetCUserIDs() {
+func (ss *ServerSuite) xTestGetCUserIDs() {
 	req := &api.GetCUserIDsRequest{
 		Page:          2, // начинаем с 0
 		PerPage:       2,
@@ -122,4 +122,13 @@ func (ss *ServerSuite) TestGetCUserIDs() {
 
 	assert.NotEqual(ss.T(), 0, len(r.CompanyUserIds))
 	log.Printf("IDS: %+v", r.CompanyUserIds)
+}
+
+func (ss *ServerSuite) TestGetCUsersByIDs() {
+	r, err := ss.srv.GetCUsersByIDs(ss.ctx, &api.GetCUsersByIDsRequest{CompanyUserIds: []int64{13, 7}})
+	require.Nil(ss.T(), err)
+	assert.NotEqual(ss.T(), 0, len(r.CompanyUsers))
+	for k, v := range r.CompanyUsers {
+		log.Printf("ID %d: %v", k, v)
+	}
 }
