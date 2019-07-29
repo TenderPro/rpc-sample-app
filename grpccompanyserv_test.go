@@ -80,9 +80,23 @@ func (ss *ServerSuite) xTestGetCompaniesByIDs() {
 	}
 }
 
-func (ss *ServerSuite) TestAddUserToCompany() {
+func (ss *ServerSuite) xTestAddUserToCompany() {
 	r, err := ss.srv.AddUserToCompany(ss.ctx, &api.AddUserToCompanyRequest{UserId: -1, CompanyId: 32})
 	require.Nil(ss.T(), err)
 	assert.NotEqual(ss.T(), 0, r.CompanyUserId)
 
+}
+
+func (ss *ServerSuite) TestSwitchCUserStatus() {
+
+	r, err := ss.srv.SwitchCUserStatus(ss.ctx, &api.SwitchCUserStatusRequest{
+		// Идентификатор пользователя компании.
+		CompanyUserId: 13,
+		// Статус, с которого нужно переключиться.
+		FromStatus: 0,
+		// Статус, на который нужно переключиться.
+		ToStatus: 1,
+	})
+	require.Nil(ss.T(), err)
+	assert.Equal(ss.T(), int32(0), r.ErrorCode)
 }
