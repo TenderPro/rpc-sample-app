@@ -87,7 +87,7 @@ func (ss *ServerSuite) xTestAddUserToCompany() {
 
 }
 
-func (ss *ServerSuite) TestSwitchCUserStatus() {
+func (ss *ServerSuite) xTestSwitchCUserStatus() {
 
 	r, err := ss.srv.SwitchCUserStatus(ss.ctx, &api.SwitchCUserStatusRequest{
 		// Идентификатор пользователя компании.
@@ -99,4 +99,27 @@ func (ss *ServerSuite) TestSwitchCUserStatus() {
 	})
 	require.Nil(ss.T(), err)
 	assert.Equal(ss.T(), int32(0), r.ErrorCode)
+}
+
+func (ss *ServerSuite) TestGetCUserIDs() {
+	req := &api.GetCUserIDsRequest{
+		Page:          2, // начинаем с 0
+		PerPage:       2,
+		SortField:     1,
+		SortDirection: 0,
+		AndFilters: []*api.CUserFilter{
+			&api.CUserFilter{Filter: &api.CUserFilter_CompanyId{CompanyId: -1}},
+			&api.CUserFilter{Filter: &api.CUserFilter_UserId{UserId: -1}},
+			&api.CUserFilter{Filter: &api.CUserFilter_Status{Status: 0}},
+			&api.CUserFilter{Filter: &api.CUserFilter_CreatedAtTsSince{CreatedAtTsSince: 1}},
+			&api.CUserFilter{Filter: &api.CUserFilter_CreatedAtTsUntil{CreatedAtTsUntil: time.Now().Unix()}},
+			&api.CUserFilter{Filter: &api.CUserFilter_UpdatedAtTsSince{UpdatedAtTsSince: 1}},
+			&api.CUserFilter{Filter: &api.CUserFilter_UpdatedAtTsUntil{UpdatedAtTsUntil: time.Now().Unix()}},
+		},
+	}
+	r, err := ss.srv.GetCUserIDs(ss.ctx, req)
+	require.Nil(ss.T(), err)
+
+	assert.NotEqual(ss.T(), 0, len(r.CompanyUserIds))
+	log.Printf("IDS: %+v", r.CompanyUserIds)
 }
