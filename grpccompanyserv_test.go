@@ -133,8 +133,14 @@ func (ss *ServerSuite) xTestGetCUsersByIDs() {
 	}
 }
 
-func (ss *ServerSuite) TestSetSessionCUser() {
+func (ss *ServerSuite) xTestSetSessionCUser() {
 	r, err := ss.srv.SetSessionCUser(ss.ctx, &api.SetSessionCUserRequest{SessionId: 1, CompanyUserId: 13})
 	require.Nil(ss.T(), err)
 	assert.Equal(ss.T(), int32(0), r.ErrorCode)
+}
+
+func (ss *ServerSuite) TestGetSessionCUser() {
+	r, err := ss.srv.GetSessionCUser(ss.ctx, &api.GetSessionCUserRequest{SessionId: 1})
+	require.Nil(ss.T(), err)
+	assert.NotEqual(ss.T(), int64(0), r.CompanyUserId)
 }
