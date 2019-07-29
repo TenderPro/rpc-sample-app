@@ -124,11 +124,17 @@ func (ss *ServerSuite) xTestGetCUserIDs() {
 	log.Printf("IDS: %+v", r.CompanyUserIds)
 }
 
-func (ss *ServerSuite) TestGetCUsersByIDs() {
+func (ss *ServerSuite) xTestGetCUsersByIDs() {
 	r, err := ss.srv.GetCUsersByIDs(ss.ctx, &api.GetCUsersByIDsRequest{CompanyUserIds: []int64{13, 7}})
 	require.Nil(ss.T(), err)
 	assert.NotEqual(ss.T(), 0, len(r.CompanyUsers))
 	for k, v := range r.CompanyUsers {
 		log.Printf("ID %d: %v", k, v)
 	}
+}
+
+func (ss *ServerSuite) TestSetSessionCUser() {
+	r, err := ss.srv.SetSessionCUser(ss.ctx, &api.SetSessionCUserRequest{SessionId: 1, CompanyUserId: 13})
+	require.Nil(ss.T(), err)
+	assert.Equal(ss.T(), int32(0), r.ErrorCode)
 }
