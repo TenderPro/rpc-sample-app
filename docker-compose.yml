@@ -10,7 +10,7 @@ services:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
       - ./db-data:/var/lib/postgresql/data/
-      - ./db-init:/docker-entrypoint-initdb.d/
+      - ./sql:/docker-entrypoint-initdb.d/
     ports:
       - 15432:5432
     environment:

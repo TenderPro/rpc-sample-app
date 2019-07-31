@@ -2,11 +2,11 @@
 
 ## Описание
 
-Сервис на golang, предоставляющий gRPC API. API сервиса, включая все структуры запросов, ответов и коды ошибок описаны в [protobuf](api.proto)
+Сервис на golang, предоставляющий gRPC API. API сервиса, включая все структуры запросов, ответов и коды ошибок описаны в [protobuf](grpccompanyserv/api.proto)
 
 ## Требования к Сервису
 
-1. сервис должен работать в отдельной БД (Postgresql) с заданной структурой таблиц (схема данных - [companyserv.sql](companyserv.sql)
+1. сервис должен работать в отдельной БД (Postgresql) с заданной структурой таблиц (схема данных - [companyserv.sql](sql/companyserv.sql)
 2. сервис должен конфигурироваться (хост бд, пользователь, адрес интерфейса gRPC и т.д.) через задание опций командной строки. 
 3. методы GetCUserPolicies и UpdateCUserPolicies реализовать заглушками, возвращающими всегда пустой ответ без ошибки.
 4. SwitchCUserStatus определяет допустимые переходы по таблице status_transitions
@@ -81,7 +81,7 @@ make up
 ```
 Выполнение этой команды повлечет
 * запуск локальной копии БД
-* загрузку в БД файлов из db-init
+* загрузку в БД файлов из sql
 * сборку проекта
 * запуск сервиса проекта
 
@@ -106,7 +106,7 @@ make up
 * golint выдает замечания на использование `Id`, но такая особенность protobuf [документирована](https://github.com/golang/protobuf/issues/73#issuecomment-138699104)
 * protoc создает в структурах поля с префиксом `XXX_`, что мешает использовать эти структуры в gorm. Для решения можно было бы [использовать gogo/protobuf](https://github.com/golang/protobuf/issues/52#issuecomment-284219742) или [retag](https://github.com/golang/protobuf/issues/52#issuecomment-295596893), но пришлось бы добавить комменты в api.proto
 * Ошибка внешнего ключа для PG возвращается в таком виде: `Severity:"ERROR", Code:"23503", Message:"insert or update on table \"company_users\" violates foreign key constraint \"fk_rails_946619ff40\"", Detail:"Key (user_id)=(-2) is not present in table \"users\".", Table:"company_users", Constraint:"fk_rails_946619ff40"`, если ключи называть осмысленно, по имени можно было бы сказать, с какой таблицей связана ошибка. Без этого приходится проверять отдельно и в транзакции
-* файл db-init/z_addon.sql содержит дополнения в БД, необходимые для запуска тестов
+* файл sql/z_addon.sql содержит дополнения в БД, необходимые для запуска тестов
 
 ## Автор
 
