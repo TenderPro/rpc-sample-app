@@ -79,7 +79,7 @@ api: ## Generate grpc go sources
 dep: ## Get the dependencies
 	@go get -v -d ./...
 
-build: dep api ## Build the binary file for server
+build: dep ## Build the binary file for server
 	@go build -i -v .
 
 run: ## Build and run binary
