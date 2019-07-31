@@ -4,8 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"time"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/keepalive"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
@@ -22,10 +24,11 @@ import (
 // DBConfig holds cli part of pg.Options
 type DBConfig struct {
 	Addr     string `long:"addr"  default:"localhost:5432" description:"host:port"`
+	Driver   string `long:"driver" default:"postgres" description:"DB driver"`
 	User     string `long:"user" description:"User name"`
 	Password string `long:"password" description:"User password"`
 	Database string `long:"name" description:"Database name"`
-	Options  string `long:"opts" default:"sslmode=disable" description:"Database options"`
+	Options  string `long:"opts" default:"sslmode=disable" description:"Database connect options"`
 }
 
 // Config holds all config vars
@@ -74,9 +77,10 @@ func setupLog(cfg *Config) loggers.Contextual {
 	return &mapper.Logger{Logger: l} // Same as mapper.NewLogger(l) but without info log message
 }
 
-// setupRouter creates gin router
+// serve creates and starts service
 func serve(cfg *Config, log loggers.Contextual) {
-	url := fmt.Sprintf("postgres://%s:%s@%s/%s?%s",
+	url := fmt.Sprintf("%s://%s:%s@%s/%s?%s",
+		cfg.DB.Driver,
 		cfg.DB.User,
 		cfg.DB.Password,
 		cfg.DB.Addr,
@@ -84,12 +88,14 @@ func serve(cfg *Config, log loggers.Contextual) {
 		cfg.DB.Options,
 	)
 	log.Debugf("Connect: %s", url)
-	db, err := gorm.Open("postgres", url)
+	db, err := gorm.Open(cfg.DB.Driver, url)
 	if err != nil {
 		log.Fatalf("failed to connect: %v", err)
 	}
 	defer db.Close()
-
+	if cfg.IsDebugging {
+		db = db.Debug()
+	}
 	// create a listener on TCP port
 	lis, err := net.Listen("tcp", cfg.Addr)
 	if err != nil {
@@ -98,8 +104,11 @@ func serve(cfg *Config, log loggers.Contextual) {
 	// create a server instance
 	s := api.NewCompanyServer(&cfg.API, log, db)
 	// create a gRPC server object
-	grpcServer := grpc.NewServer()
-	// attach the Ping service to the server
+	grpcServer := grpc.NewServer(
+		grpc.KeepaliveParams(keepalive.ServerParameters{
+			MaxConnectionIdle: 5 * time.Minute,
+		}))
+	// attach the service to the server
 	api.RegisterCompanyServiceServer(grpcServer, s)
 	// start the server
 	if err := grpcServer.Serve(lis); err != nil {
