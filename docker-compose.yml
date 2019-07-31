@@ -1,0 +1,50 @@
+# This file used by make for docker-composer container operations
+# including docker image build
+
+version: '2.1'
+
+services:
+  db:
+    image: postgres:11.4
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+      - ./db-data:/var/lib/postgresql/data/
+      - ./db-init:/docker-entrypoint-initdb.d/
+    ports:
+      - 15432:5432
+    environment:
+      - POSTGRES_DB=${PGDATABASE}
+      - POSTGRES_USER=${PGUSER}
+      - POSTGRES_PASSWORD=${PGPASSWORD}
+    healthcheck:
+      test: ["CMD", "pg_isready", "-q", "-U", "${PGUSER}", "-h", "db"]
+      interval: 2s
+      timeout: 3s
+      retries: 3
+    stop_grace_period: 5s
+    stop_signal: SIGINT
+    networks:
+       - app-network
+
+  app:
+    image: ${APP_IMAGE}
+    depends_on:
+      db:
+        condition: service_healthy
+    command:
+      --debug --addr=:7070 --db.addr=db:5432 --db.name=${PGDATABASE} --db.user=${PGUSER} --db.password=${PGPASSWORD}
+    ports:
+      - "${APP_LISTEN:-7070}:7070"
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    build:
+      context: .
+    networks:
+       - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
