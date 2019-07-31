@@ -10,9 +10,9 @@ RUN go mod download
 
 # Sources dependent layer
 COPY ./ ./
-RUN go build -o  grpcsample./cmd/server
+RUN go build .
 # Для версии из git:
-# RUN go build -o  grpcsample-ldflags "-X main.version=`git describe --tags`" ./cmd/server
+# RUN go build -ldflags "-X main.version=`git describe --tags`" .
 
 FROM alpine:3.9
 
