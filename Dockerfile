@@ -16,14 +16,11 @@ RUN go build -o  grpcsample./cmd/server
 
 FROM alpine:3.9
 
-MAINTAINER Aleksei Kovrizhkin <lekovr@gmail.com>
-
 ENV DOCKERFILE_VERSION  190730
-
-COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 WORKDIR /opt/companyserv
 
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /opt/companyserv/ grpcsample/usr/bin/companyserv
 
 ENTRYPOINT ["/usr/bin/companyserv"]

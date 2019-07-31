@@ -1,9 +1,12 @@
+// main application file, see README.md
 package main
 
 import (
 	"errors"
 	"fmt"
+	"log"
 	"net"
+	"os"
 	"time"
 
 	"google.golang.org/grpc"
@@ -47,6 +50,45 @@ var (
 	// ErrBadArgs returned after showing command args error message
 	ErrBadArgs = errors.New("option error printed")
 )
+
+// Actual version value will be set at build time
+var version = "0.0-dev"
+
+// main может быть вынесена в отдельный фал и исключена из расчета code coverage
+func main() {
+	run(os.Exit)
+}
+
+// код основной функции с поддержкой тестов
+func run(exitFunc func(code int)) {
+	log.Printf(" grpcsample%s. Company service", version)
+	var err error
+	var cfg *Config
+	defer func() { shutdown(exitFunc, err) }()
+	cfg, err = setupConfig()
+	if err != nil {
+		return
+	}
+	l := setupLog(cfg)
+	serve(cfg, l)
+}
+
+// exit after deferred cleanups have run
+func shutdown(exitFunc func(code int), e error) {
+	if e != nil {
+		var code int
+		switch e {
+		case ErrGotHelp:
+			code = 3
+		case ErrBadArgs:
+			code = 2
+		default:
+			code = 1
+			log.Printf("Run error: %s", e.Error())
+		}
+		exitFunc(code)
+	}
+}
 
 // setupConfig loads flags from args (if given) or command flags and ENV otherwise
 func setupConfig(args ...string) (*Config, error) {

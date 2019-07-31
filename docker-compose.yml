@@ -21,7 +21,7 @@ services:
       test: ["CMD", "pg_isready", "-q", "-U", "${PGUSER}", "-h", "db"]
       interval: 2s
       timeout: 3s
-      retries: 3
+      retries: 10
     stop_grace_period: 5s
     stop_signal: SIGINT
     networks:
@@ -35,7 +35,7 @@ services:
     command:
       --debug --addr=:7070 --db.addr=db:5432 --db.name=${PGDATABASE} --db.user=${PGUSER} --db.password=${PGPASSWORD}
     ports:
-      - "${APP_LISTEN:-7070}:7070"
+      - "${APP_PORT:-7070}:7070"
     volumes:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
