@@ -164,7 +164,7 @@ conf: ## Create initial config
 	@true
 
 clean: ## Remove previous builds
-	@rm $(SERVER_OUT) $(CLIENT_OUT)
+	@rm -f $(PRG)
 
 help: ## Display this help screen
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' Makefile | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
