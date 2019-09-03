@@ -73,8 +73,12 @@ export
 
 all: help
 
-api: ## Generate grpc go sources
-	go generate ./...
+pb: ## Generate pb sources
+	protoc \
+	 -I${GOPATH}/pkg/mod/github.com/lyft/protoc-gen-validate@v0.1.0 \
+	 --go_out=plugins=grpc:api api/pb/api.proto \
+	 --validate_out="lang=go:api" \
+	 --proto_path=api --proto_path=/usr/local/protoc/include
 
 dep: ## Get the dependencies
 	@go get -v -d ./...
