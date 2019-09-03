@@ -1,7 +1,7 @@
 
 FROM golang:1.12.6-alpine3.9 as builder
 
-WORKDIR /opt/companyserv
+WORKDIR /opt/app
 RUN apk --update add curl git
 
 # Cached layer
@@ -18,9 +18,9 @@ FROM alpine:3.9
 
 ENV DOCKERFILE_VERSION  190730
 
-WORKDIR /opt/companyserv
+WORKDIR /opt/app
 
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-COPY --from=builder /opt/companyserv/ grpcsample/usr/bin/companyserv
+COPY --from=builder /opt/app/grpcdemo /usr/bin/grpcdemo
 
-ENTRYPOINT ["/usr/bin/companyserv"]
+ENTRYPOINT ["/usr/bin/grpcdemo"]

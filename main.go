@@ -21,7 +21,8 @@ import (
 	"github.com/sirupsen/logrus"
 	"gopkg.in/birkirb/loggers.v1"
 
-	api "companyserv/grpccompanyserv"
+	"SELF/api"
+	"SELF/api/pb"
 )
 
 // DBConfig holds cli part of pg.Options
@@ -61,7 +62,7 @@ func main() {
 
 // код основной функции с поддержкой тестов
 func run(exitFunc func(code int)) {
-	log.Printf(" grpcsample%s. Company service", version)
+	log.Printf("gRPC sample %s. gRPC sample service", version)
 	var err error
 	var cfg *Config
 	defer func() { shutdown(exitFunc, err) }()
@@ -144,14 +145,14 @@ func serve(cfg *Config, log loggers.Contextual) {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	// create a server instance
-	s := api.NewCompanyServer(&cfg.API, log, db)
+	s := api.NewServer(&cfg.API, log, db)
 	// create a gRPC server object
 	grpcServer := grpc.NewServer(
 		grpc.KeepaliveParams(keepalive.ServerParameters{
 			MaxConnectionIdle: 5 * time.Minute,
 		}))
 	// attach the service to the server
-	api.RegisterCompanyServiceServer(grpcServer, s)
+	pb.RegisterGreeterServer(grpcServer, s)
 	// start the server
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %s", err)

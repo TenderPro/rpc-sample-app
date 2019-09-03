@@ -12,7 +12,7 @@ APP_PORT      ?= 7070
 PGHOST        ?= localhost
 PGPORT        ?= 5432
 PGDATABASE    ?= $(PRG)
-PGUSER        ?= ma
+PGUSER        ?= $(PRG)
 PGPASSWORD    ?= $(shell < /dev/urandom tr -dc A-Za-z0-9 | head -c14; echo)
 PGAPPNAME     ?= $(PRG)
 
@@ -83,7 +83,7 @@ build: dep ## Build the binary file for server
 	@go build -i -v .
 
 run: ## Build and run binary
-	@go run . --debug --db.addr=localhost:15432 --addr=localhost:${APP_PORT} \
+	@go run . --debug --db.addr=localhost:5432 --addr=localhost:${APP_PORT} \
 	--db.name=${PGDATABASE} --db.user=${PGUSER} --db.password=${PGPASSWORD}
 
 lint: ## Run linter
@@ -134,7 +134,7 @@ dcape-db-create: docker-wait ## Create user, db and load dump
 	docker exec -i $$DCAPE_DB psql -U postgres -c "CREATE USER \"$$PGUSER\" WITH PASSWORD '$$PGPASSWORD';" || true ; \
 	docker exec -i $$DCAPE_DB psql -U postgres -c "CREATE DATABASE \"$$PGDATABASE\" OWNER \"$$PGUSER\";" || db_exists=1 ; \
 	if [[ ! "$$db_exists" ]] ; then \
-	    cat companyserv.sql | docker exec -i $$DCAPE_DB psql -U postgres -d $$PGDATABASE -1 -X ; \
+	    cat sql/crebas.sql | docker exec -i $$DCAPE_DB psql -U postgres -d $$PGDATABASE -1 -X ; \
 	    echo "Restore completed" ; \
 	fi
 

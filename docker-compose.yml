@@ -9,7 +9,7 @@ services:
     volumes:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
-      - ./db-data:/var/lib/postgresql/data/
+      - ./var/data:/var/lib/postgresql/data/
       - ./sql:/docker-entrypoint-initdb.d/
     ports:
       - 15432:5432
@@ -33,7 +33,7 @@ services:
       db:
         condition: service_healthy
     command:
-      --debug --addr=:7070 --db.addr=db:5432 --db.name=${PGDATABASE} --db.user=${PGUSER} --db.password=${PGPASSWORD}
+      --addr=:7070 --db.addr=db:5432 --db.name=${PGDATABASE} --db.user=${PGUSER} --db.password=${PGPASSWORD}
     ports:
       - "${APP_PORT:-7070}:7070"
     volumes:
