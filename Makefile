@@ -87,7 +87,7 @@ build: dep ## Build the binary file for server
 	@go build -i -v .
 
 run: ## Build and run binary
-	@go run . --debug --db.addr=localhost:5432 --addr=localhost:${APP_PORT} \
+	@go run . --db.addr=localhost:5432 --addr=localhost:${APP_PORT} \
 	--db.name=${PGDATABASE} --db.user=${PGUSER} --db.password=${PGPASSWORD}
 
 lint: ## Run linter

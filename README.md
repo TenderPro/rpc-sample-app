@@ -23,23 +23,21 @@ Usage:
   grpcsample [OPTIONS]
 
 Application Options:
-      --addr=         Listen address (default: localhost:7070)
-      --debug         Print debug logs
-
-API Options:
-      --api.maxcount= Id slice max len (default: 1000)
+      --addr=        Listen address (default: localhost:7070)
+      --metric_addr= prometheus service host:port (default: localhost:8080)
+      --metric_url=  prometheus service URL (default: /metrics)
+      --log_level=   Log level (default: debug)
 
 DB Options:
-      --db.addr=      host:port (default: localhost:5432)
-      --db.driver=    DB driver (default: postgres)
-      --db.user=      User name
-      --db.password=  User password
-      --db.name=      Database name
-      --db.opts=      Database connect options (default: sslmode=disable)
+      --db.addr=     host:port (default: localhost:5432)
+      --db.driver=   DB driver (default: postgres)
+      --db.user=     User name
+      --db.password= User password
+      --db.name=     Database name
+      --db.opts=     Database connect options (default: sslmode=disable)
 
 Help Options:
-  -h, --help          Show this help message
-
+  -h, --help         Show this help message
 ```
 
 ### Использование make
@@ -51,7 +49,6 @@ Help Options:
 Полный список команд:
 ```
 $ make help
-api                            Generate grpc go sources
 build                          Build the binary file for server
 clean                          Remove previous builds
 conf                           Create initial config
@@ -63,12 +60,12 @@ dep                            Get the dependencies
 down                           Stop containers and remove them
 help                           Display this help screen
 lint                           Run linter
+pb                             Generate pb sources
 psql                           Run psql via postgresql docker container
 run                            Build and run binary
 test                           Run grpc client tests
 up-db                          Start pg container only
 up                             Start pg and app containers
-
 ```
 
 ### Использование docker

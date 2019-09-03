@@ -21,6 +21,6 @@ ENV DOCKERFILE_VERSION  190730
 WORKDIR /opt/app
 
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-COPY --from=builder /opt/app/grpcdemo /usr/bin/grpcdemo
+COPY --from=builder /opt/app/grpcsample /usr/bin/grpcsample
 
-ENTRYPOINT ["/usr/bin/grpcdemo"]
+ENTRYPOINT ["/usr/bin/grpcsample"]
