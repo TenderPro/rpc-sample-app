@@ -2,15 +2,23 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log"
 	"net"
+	"net/http"
 	"os"
 	"time"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
+
+	"github.com/grpc-ecosystem/go-grpc-middleware"
+	"github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
+	"github.com/grpc-ecosystem/go-grpc-middleware/recovery"
+	"github.com/grpc-ecosystem/go-grpc-prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
@@ -38,8 +46,9 @@ type DBConfig struct {
 // Config holds all config vars
 type Config struct {
 	Addr string `long:"addr" default:"localhost:7070"  description:"Listen address"`
-	// TODO:testing	IsSingle    bool   `long:"single" description:"Run service in single transaction"`
-	IsDebugging bool `long:"debug" description:"Print debug logs"`
+	MetricAddr string `long:"metric_addr"  default:"localhost:8080" description:"prometheus service host:port"`
+	MetricURL  string `long:"metric_url"  default:"/metrics" description:"prometheus service URL"`
+	LogLevel   string `long:"log_level" default:"debug" description:"Log level"`
 
 	API api.Config `group:"API Options" namespace:"api"`
 	DB  DBConfig   `group:"DB Options" namespace:"db"`
@@ -113,10 +122,14 @@ func setupConfig(args ...string) (*Config, error) {
 // setupLog creates logger
 func setupLog(cfg *Config) loggers.Contextual {
 	l := logrus.New()
-	if cfg.IsDebugging {
-		l.SetLevel(logrus.DebugLevel)
+	ll, err := logrus.ParseLevel(cfg.LogLevel)
+	if err != nil {
+		l.Fatal(err)
+	}
+	if ll == logrus.DebugLevel {
 		l.SetReportCaller(true)
 	}
+	l.SetLevel(ll)
 	return &mapper.Logger{Logger: l} // Same as mapper.NewLogger(l) but without info log message
 }
 
@@ -136,23 +149,51 @@ func serve(cfg *Config, log loggers.Contextual) {
 		log.Fatalf("failed to connect: %v", err)
 	}
 	defer db.Close()
-	if cfg.IsDebugging {
-		db = db.Debug()
-	}
+	db.LogMode(cfg.LogLevel == "debug")
+	db.SetLogger(gorm.Logger{LogWriter: log})
 	// create a listener on TCP port
 	lis, err := net.Listen("tcp", cfg.Addr)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
+	opts := []grpc_recovery.Option{
+		// go-grpc-middleware@v1.0.0 does not have WithRecoveryHandlerContext
+		grpc_recovery.WithRecoveryHandlerContext(func(ctx context.Context, p interface{}) error {
+			err := fmt.Errorf("PANIC: %s", p)
+			return err
+		}),
+	}
+	logrusEntry := logrus.NewEntry(log.(*mapper.Logger).Logger)
 	// create a server instance
 	s := api.NewServer(&cfg.API, log, db)
 	// create a gRPC server object
 	grpcServer := grpc.NewServer(
 		grpc.KeepaliveParams(keepalive.ServerParameters{
 			MaxConnectionIdle: 5 * time.Minute,
-		}))
+		}),
+		grpc_middleware.WithUnaryServerChain(
+			grpc_prometheus.UnaryServerInterceptor,
+			grpc_logrus.UnaryServerInterceptor(logrusEntry),
+			grpc_recovery.UnaryServerInterceptor(opts...),
+		),
+		grpc_middleware.WithStreamServerChain(
+			grpc_prometheus.StreamServerInterceptor,
+			grpc_logrus.StreamServerInterceptor(logrusEntry),
+			grpc_recovery.StreamServerInterceptor(opts...),
+		),
+	)
 	// attach the service to the server
 	pb.RegisterGreeterServer(grpcServer, s)
+
+	grpc_prometheus.Register(grpcServer)
+	http.Handle(cfg.MetricURL, promhttp.Handler())
+	go func() {
+		err = http.ListenAndServe(cfg.MetricAddr, nil)
+		if err != nil {
+			log.Fatal("ListenAndServe: ", err)
+		}
+
+	}()
 	// start the server
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %s", err)
