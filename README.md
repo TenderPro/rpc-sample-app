@@ -98,6 +98,6 @@ make up
 * golint выдает замечания на использование `Id`, но такая особенность protobuf [документирована](https://github.com/golang/protobuf/issues/73#issuecomment-138699104)
 * protoc добавляет в структуры поля с префиксом `XXX_`, что мешает использовать эти структуры в gorm. Для решения можно было бы [использовать gogo/protobuf](https://github.com/golang/protobuf/issues/52#issuecomment-284219742) или [retag](https://github.com/golang/protobuf/issues/52#issuecomment-295596893), но пришлось бы добавить комменты в api.proto
 
-## Автор
+## License
 
-2019, Алексей Коврижкин <lekovr@gmail.com>
+Copyright (c) 2019 Aleksei Kovrizhkin <lekovr@gmail.com>
