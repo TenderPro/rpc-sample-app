@@ -1,4 +1,4 @@
-module it.elfire.ru/lekovr/grpcsample
+module github.com/LeKovr/grpcsample
 
 go 1.12
 
