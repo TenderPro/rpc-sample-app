@@ -1,0 +1,112 @@
+syntax = "proto3";
+
+//option go_package = "github.com/TenderPro/rpc-sample-app/proto";
+
+package pb;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "github.com/mwitkow/go-proto-validators/validator.proto";
+
+import "github.com/nats-rpc/nrpc/nrpc.proto";
+import "github.com/TenderPro/rpckit/app/ticker/ticker.proto";
+
+option (gogoproto.goproto_stringer_all) = false;
+option (gogoproto.stringer_all) =  true;
+option (gogoproto.marshaler_all) = true;
+option (gogoproto.unmarshaler_all) = true;
+
+//option (nrpc.packageSubject) = "root";
+//option (nrpc.packageSubjectParams) = "instance";
+//option (nrpc.serviceSubjectRule) = TOLOWER;
+//option (nrpc.methodSubjectRule) = TOLOWER;
+
+//option (gogoproto.gogoproto_import) = false;
+
+import "protoc-gen-swagger/options/annotations.proto";
+
+
+option (grpc.gateway.protoc_gen_swagger.options.openapiv2_swagger) = {
+  info: {
+      title: "gRPC-NATS Demo Service"
+      version: "1.0"
+      contact: {
+          name: "Aleksei Kovrizhkin"
+          url: "https://www.tender.pro"
+          email: "lekovr+tpro@gmail.com"
+        };
+  };
+  schemes: [HTTP,HTTPS]
+  responses: {
+    key: "404"
+    value: {
+      description: "Returned when the resource does not exist."
+      schema: {
+        json_schema: {
+          type: STRING
+        };
+      };
+    };
+  };
+};
+
+service PingService {
+  rpc Ping(PingRequest) returns (PingResponse) {
+    option (google.api.http) = {
+      get: "/v1/sample/ping"
+    };
+  }
+
+  rpc PingEmpty(Empty) returns (PingResponse) {
+    option (google.api.http) = {
+      get: "/v1/sample/ping/empty"
+    };
+  }
+
+  rpc PingError(PingRequest) returns (Empty) {
+    option (google.api.http) = {
+      get: "/v1/sample/ping/error"
+    };
+  }
+
+  rpc PingList(PingRequest) returns (stream PingResponse) {
+    option (google.api.http) = {
+      get: "/v1/sample/ping/list/{value}"
+    };
+    option (nrpc.streamedReply) = true;
+  }
+
+  /*
+  SOAP does not support client streaming
+  rpc PingStream(stream PingRequest) returns (stream PingResponse) {
+    option (google.api.http) = {
+      post: "/v1/sample/ping/stream"
+      body: "*"
+    };
+    option (nrpc.streamedReply) = true;
+  }
+*/
+
+  // Время на сервере
+  rpc TimeService(ticker.TimeRequest) returns (stream ticker.TimeResponse) {
+    option (google.api.http) = {
+      get: "/v1/time/{every}"
+    };
+    option (nrpc.streamedReply) = true;
+  }
+}
+
+
+message Empty {
+}
+
+message PingRequest {
+  string value = 1 [(gogoproto.moretags) = "log_field:\"ping_value\""];
+  int32 sleep_time_ms = 2 [(validator.field) = {int_gt: 0, int_lt: 10}];
+  uint32 error_code_returned = 3;
+}
+
+message PingResponse {
+  string Value = 1;
+  int32 counter = 2;
+}

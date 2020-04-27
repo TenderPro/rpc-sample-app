@@ -1,3 +1,3 @@
-grpcsample
-*.env
-var
+.env*
+/app
+coverage.*

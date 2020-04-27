@@ -1,20 +1,19 @@
-// +build !test
+//+build !test
 
-// main application file, see README.md
+// This file holds code which does not intended for test coverage
+
 package main
 
 import (
 	"os"
 
-	_ "github.com/jinzhu/gorm/dialects/postgres"
-
-	"SELF/server"
+//	"github.com/TenderPro/rpc-sample-app/pkg/app"
+	"SELF/pkg/app"
 )
 
 // Actual version value will be set at build time
 var version = "0.0-dev"
 
-// main не включается в расчет code coverage
 func main() {
-	server.Run(version, os.Exit)
+	app.Run(version, os.Exit)
 }

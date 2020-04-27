@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Sample page service</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="js/ws.js"></script>
+</head>
+<body onload = pageLoaded(false);>
+<h1>Пример websocket</h1>
+  <h2>Время на сервере</h2>
+  <form id="time.form" op="time" onsubmit="event.preventDefault(); sendForm(this);">
+<div id="time">&nbsp;</div>
+  	Обновляется кратно
+    <input type="text" name="arg" style="width:30px" value="5" />
+    сек
+    <input type="submit" value="Изменить">
+  </form>
+
+<hr>
+<h2>Пример WS (echo)</h2>
+<form op="echo">
+Текст: <input type=text name="arg" value="test">
+    <input type="button" value="Отправить" onclick="return sendForm(this.form);">
+</form>
+<div id="echo"></div>
+
+<hr>
+<div id="err"></div>
+<div id="log"></div>
+</body>
+</html>

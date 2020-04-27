@@ -5,6 +5,13 @@ CFG           ?= .env
 PRG           ?= $(shell basename $$PWD)
 
 # -----------------------------------------------------------------------------
+# Build config
+
+GO            ?= go
+SOURCES       ?= pkg/*/*.go *.go
+VERSION       ?= $(shell git describe --tags --always)
+
+# -----------------------------------------------------------------------------
 # Runtime data
 
 APP_PORT      ?= 7070
@@ -19,21 +26,28 @@ PGAPPNAME     ?= $(PRG)
 # -----------------------------------------------------------------------------
 # docker part
 
-APP_IMAGE  ?= $(PRG)
+APP_IMAGE    ?= $(PRG)
 
 # image prefix
 PROJECT_NAME ?= $(PRG)
 
-# docker-compose image
-DC_VER ?= 1.23.2
+# Service container network
+DOCKER_NET   ?= dcape_net
+
+# Postgresql container name
+PG_CONTAINER ?= dcape_db_1
 
 # -----------------------------------------------------------------------------
-# dcape part
+# docker-compose part
 
-# dcape containers name prefix
-DCAPE_PROJECT_NAME ?= dcape
-# dcape postgresql container name
-DCAPE_DB           ?= $(DCAPE_PROJECT_NAME)_db_1
+# dc image version
+DC_VER       ?= 1.23.2
+
+# App targets for dc
+APPS         ?= app
+
+# Service targets for dc
+SERVICEAPPS  ?= log trace
 
 
 define CONFIG_DEFAULT
@@ -73,29 +87,77 @@ export
 
 all: help
 
-pb: ## Generate pb sources
-	protoc \
-	 -I${GOPATH}/pkg/mod/github.com/lyft/protoc-gen-validate@v0.1.0 \
-	 --go_out=plugins=grpc:api api/pb/api.proto \
-	 --validate_out="lang=go:api" \
-	 --proto_path=api --proto_path=/usr/local/protoc/include
+gen:
+	docker run -ti --rm \
+  -w $$PWD \
+  -v $$PWD:$$PWD \
+  -v $$PWD/../rpckit:/usr/local/include/github.com/TenderPro/rpckit \
+  tenderpro/protoc-go -I=. \
+    --gogofast_out=plugins=grpc,\
+Mgoogle/protobuf/timestamp.proto=github.com/gogo/protobuf/types:pkg/pb \
+    --grpc-gateway_out=logtostderr=true:pkg/pb \
+    --govalidators_out="lang=go:pkg/pb" \
+    --nrpc_out=plugins=prometheus:pkg/nrpcgen \
+    --swagger_out=logtostderr=true,allow_merge=true,merge_file_name=api:static/html/devel/openapi/ \
+    --wsdl_out=soapgen:pkg/soapgen \
+    --grpcer_out=soapgen:pkg/soapgen \
+    --doc_out=static/html/devel \
+    --doc_opt=html,api.html \
+    main.proto
+	sed -i.bak 's|pb "."|pb "SELF/pkg/pb"|' pkg/soapgen/main.grpcer.go
+	cat pkg/soapgen/main.wsdl > static/html/devel/api.wsdl 
+	rm -f pkg/soapgen/main.wsdl
+	gofmt pkg/nrpcgen/main.nrpc.go > pkg/nrpcgen/main.nrpc.go.orig
+	rm -f pkg/nrpcgen/main.nrpc.go
+	rm -f static/html/devel/api.wsdl
+
+gen-prod: gen ## Generate files for production
+	go-bindata -pkg static -prefix $PWD/static -o pkg/static/bindata.go static/...
+
+gen-dev: ## Generate files for development
+	go-bindata -debug -pkg staticgen -prefix static -o pkg/staticgen/bindata.go static/...
+	# TODO: mocks
+
 
 dep: ## Get the dependencies
 	@go get -v -d ./...
 
 build: dep ## Build the binary file for server
-	@go build -i -v .
+	@go build -i -v -tags dev .
 
 run: ## Build and run binary
-	@go run . --db.addr=localhost:5432 --addr=localhost:${APP_PORT} \
-	--db.name=${PGDATABASE} --db.user=${PGUSER} --db.password=${PGPASSWORD}
+	@go run -tags dev . -- mono --debug
+
+# --db.addr=localhost:5432 --addr=localhost:${APP_PORT} \
+#	--db.name=${PGDATABASE} --db.user=${PGUSER} --db.password=${PGPASSWORD}
 
 lint: ## Run linter
-	@golangci-lint run ./...
+	@golangci-lint run
 
 test: ## Run grpc client tests
 	APP_ADDR=localhost:${APP_PORT} \
 	go test -v -count=1 .
+
+t-ping:
+	curl -X POST http://localhost:8081/v1/sample/ping
+
+t-stream:
+	curl http://localhost:8081/v1/sample/ping/list/string88
+
+## Run tests and fill coverage.out
+cov: coverage.out
+
+# internal target
+coverage.out: $(SOURCES)
+	$(GO) test -test.v -test.race -coverprofile=$@ -covermode=atomic -tags test ./...
+
+## Open coverage report in browser
+cov-html: cov
+	$(GO) tool cover -html=coverage.out
+
+## Clean coverage report
+cov-clean:
+	rm -f coverage.*
 
 # ------------------------------------------------------------------------------
 # Docker

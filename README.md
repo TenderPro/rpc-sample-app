@@ -1,4 +1,4 @@
-# grpcsample
+# rpc-sample-app
 
 ## Описание
 
@@ -8,6 +8,13 @@
 
 1. сервис должен работать в отдельной БД (Postgresql) с заданной структурой таблиц (схема данных - [crebas.sql](sql/crebas.sql)
 2. сервис должен конфигурироваться (хост бд, пользователь, адрес интерфейса gRPC и т.д.) через задание опций командной строки. 
+
+## Варианты работы приложения
+
+1. mono - полный функционал без NRPC (monolyth: proxy <-> handler)
+2. bus - полный функционал с обменом по NRPC между gRPC-proxy и сервером (proxy <-> bus <-> handler)
+3. handler - функционал сервера, который подключается к NATS в качестве сервера
+4. proxy - функционал gRPC-proxy, который подключается к NATS в качестве клиента
 
 ## Описание реализации
 
@@ -100,4 +107,5 @@ make up
 
 ## License
 
+Copyright (c) 2020 Tender.Pro <it@tender.pro>
 Copyright (c) 2019 Aleksei Kovrizhkin <lekovr@gmail.com>

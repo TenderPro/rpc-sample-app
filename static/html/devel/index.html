@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Sample page service</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="js/opentracing-browser.min.js"></script>
+</head>
+<body onload = pageLoaded();>
+<h1>Пример сервиса</h1>
+
+<ul>
+  <li><a href="openapi/">Swagger</a></li>
+  <li><a href="/soap/">SOAP</a> (<a href="messages.wsdl">WSDL sample</a>) (use <a href="https://chrome.google.com/webstore/detail/wizdler/oebpmncolmhiapingjaagmapififiakb">Wizdler</a>)</li>
+  <li><a href="ws.html">websocket</a></li>
+  <li><a href="api.html">API docs</a></li>
+  <li><a href="/metrics">Prometheus data</a></li>
+</ul>
+<hr />
+<h2>Дополнения</h2>
+<ul>
+  <li><a id="jaeger" href="http://localhost:16686">jaeger</a></li>
+  <li><a id="nats" href="http://localhost:8222">NATS</a></li>
+</ul>
+<script>
+function pageLoaded() {
+  var loc = window.location, url;
+  if (!loc.host.startsWith("localhost")) {
+    // Run via dcape so change hosts
+    console.log('replace hrefs for ' + loc.host);
+    document.getElementById("jaeger").setAttribute('href', loc.protocol+"//jaeger."+loc.host);
+    document.getElementById("nats").setAttribute('href', loc.protocol+"//nats."+loc.host);
+  }
+  console.log('page loaded');
+}
+
+/*
+// sample code, not working yet
+var parent = opentracing.Tracer.startSpan('DoWork');
+setTimeout(function () {
+    console.log('Finishing span.');
+    span.finish();
+}, 1000);
+*/
+</script>
+</body>
+</html>
