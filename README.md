@@ -1,30 +1,58 @@
 # rpc-sample-app
 
 ## Описание
+Пример (для fork) cервиса на golang, демонстрирующий использование технологий:
 
-Сервис на golang, предоставляющий gRPC API. API сервиса, включая все структуры запросов, ответов и коды ошибок описаны в [protobuf](api/pb/api.proto)
+* gRPC
+* OpenAPI
+* Websocket
+* SOAP
+* NRPC (gRPC via NATS)
+* NATS pub/sub
 
-## Требования к Сервису
+в котором весь обмен данными между подсистемами, включая все структуры запросов, ответов и коды ошибок, описан в [protobuf](main.proto)
 
-1. сервис должен работать в отдельной БД (Postgresql) с заданной структурой таблиц (схема данных - [crebas.sql](sql/crebas.sql)
-2. сервис должен конфигурироваться (хост бд, пользователь, адрес интерфейса gRPC и т.д.) через задание опций командной строки. 
+## Варианты работы сервиса
 
-## Варианты работы приложения
+1. **mono** - полный функционал без NRPC (monolyth: proxy <-> handler)
+2. **bus** - полный функционал с обменом по NRPC между gRPC-proxy и сервером (proxy <-> bus <-> handler)
+3. **handler** - функционал сервера, который подключается к NATS в качестве сервера
+4. **proxy** - функционал gRPC-proxy, который подключается к NATS в качестве клиента
 
-1. mono - полный функционал без NRPC (monolyth: proxy <-> handler)
-2. bus - полный функционал с обменом по NRPC между gRPC-proxy и сервером (proxy <-> bus <-> handler)
-3. handler - функционал сервера, который подключается к NATS в качестве сервера
-4. proxy - функционал gRPC-proxy, который подключается к NATS в качестве клиента
+## Структура приложения
+
+```
+├── docker-compose.yml
+├── Dockerfile
+├── go.mod
+├── main.go
+├── main.proto
+├── Makefile
+├── pkg
+│   ├── app
+│   ├── nrpcgen
+│   ├── pb
+│   ├── service
+│   ├── soapgen
+│   ├── staticgen
+│   └── template
+├── README.md
+└── static
+    ├── html
+    ├── sql
+    └── tmpl
+
+```
 
 ## Описание реализации
 
-Для сборки проекта использовался go версии 1.12.6. Результат вызова `protoc`, файл api.pb.go, включен в проект и эта зависимость будет нужна только в случае изменения api.proto.
+Для сборки проекта использовался go версии 1.14. Результат вызова `protoc`, файл api.pb.go, включен в проект и эта зависимость будет нужна только в случае изменения api.proto.
 
 Команда сборки сервиса: `go build .`
 
 Сервис поддерживает следующие аргументы командной строки:
 ```
-$ ./grpcsample -h
+$ ./rpc-sample-app -h
 
 Usage:
 
@@ -39,7 +67,7 @@ Usage:
 Полный список команд:
 ```
 $ make help
-
+...
 ```
 
 ### Использование docker
@@ -71,6 +99,25 @@ make up
 
 * golint выдает замечания на использование `Id`, но такая особенность protobuf [документирована](https://github.com/golang/protobuf/issues/73#issuecomment-138699104)
 * protoc добавляет в структуры поля с префиксом `XXX_`, что мешает использовать эти структуры в gorm. Для решения можно было бы [использовать gogo/protobuf](https://github.com/golang/protobuf/issues/52#issuecomment-284219742) или [retag](https://github.com/golang/protobuf/issues/52#issuecomment-295596893), но пришлось бы добавить комменты в api.proto
+
+## TODO
+
+* [ ] актуализировать README
+* [ ] ping.Timeservice
+* [ ] актуализировать примеры в static/html и тесты в Makefile
+* [ ] pkg/app.Run - что еще вынести в rpckit?
+* [ ] пример вызова метода из шаблонов
+* [ ] nrpc: трейсинг
+* [ ] nrpc: protoc-gen (fork)
+* [ ] pgmig: пример работы с БД
+* [ ] pgmig: protoc-gen
+* [ ] пример file upload (sfs)
+* [ ] make lint
+* [ ] make cov (часть 1 - корректная работа)
+* [ ] make cov (часть 2 - тесты с docker)
+* [ ] make cov (часть 3 - coverage >80%)
+* [ ] https://codebeat.co/
+* [ ] доработать документацию
 
 ## License
 
