@@ -27,24 +27,7 @@
 $ ./grpcsample -h
 
 Usage:
-  grpcsample [OPTIONS]
 
-Application Options:
-      --addr=        Listen address (default: localhost:7070)
-      --metric_addr= prometheus service host:port (default: localhost:8080)
-      --metric_url=  prometheus service URL (default: /metrics)
-      --log_level=   Log level (default: debug)
-
-DB Options:
-      --db.addr=     host:port (default: localhost:5432)
-      --db.driver=   DB driver (default: postgres)
-      --db.user=     User name
-      --db.password= User password
-      --db.name=     Database name
-      --db.opts=     Database connect options (default: sslmode=disable)
-
-Help Options:
-  -h, --help         Show this help message
 ```
 
 ### Использование make
@@ -56,23 +39,7 @@ Help Options:
 Полный список команд:
 ```
 $ make help
-build                          Build the binary file for server
-clean                          Remove previous builds
-conf                           Create initial config
-dcape-db-create                Create user, db and load dump
-dcape-db-drop                  Drop database and user
-dcape-psql                     Run psql
-dc                             Run docker-compose (make dc CMD=build)
-dep                            Get the dependencies
-down                           Stop containers and remove them
-help                           Display this help screen
-lint                           Run linter
-pb                             Generate pb sources
-psql                           Run psql via postgresql docker container
-run                            Build and run binary
-test                           Run grpc client tests
-up-db                          Start pg container only
-up                             Start pg and app containers
+
 ```
 
 ### Использование docker
@@ -106,6 +73,8 @@ make up
 * protoc добавляет в структуры поля с префиксом `XXX_`, что мешает использовать эти структуры в gorm. Для решения можно было бы [использовать gogo/protobuf](https://github.com/golang/protobuf/issues/52#issuecomment-284219742) или [retag](https://github.com/golang/protobuf/issues/52#issuecomment-295596893), но пришлось бы добавить комменты в api.proto
 
 ## License
+
+The MIT License (MIT), see [LICENSE](LICENSE).
 
 Copyright (c) 2020 Tender.Pro <it@tender.pro>
 Copyright (c) 2019 Aleksei Kovrizhkin <lekovr@gmail.com>
