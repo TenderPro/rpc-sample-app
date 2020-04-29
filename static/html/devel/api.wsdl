@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="http://main.proto/PingService/" xmlns:types="http://main.proto/PingService_types/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xs="http://www.w3.org/2001/XMLSchema" name="PingService" targetNamespace="http://main.proto/PingService/">
+  <documentation>
+    Service: PingService
+    Version: 
+    Generated: 2020-04-29 22:33:48.608416894 +0000 UTC m=+0.009118700
+    Owner: 
+  </documentation>
+  <types>
+    <xs:schema elementFormDefault="qualified" targetNamespace="http://main.proto/PingService_types/">
+      <xs:element name="exception">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="type" nillable="true" type="xs:string"/>
+            <xs:element name="message" nillable="true" type="xs:string"/>
+            <xs:element name="traceback" nillable="true" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Pb_Empty">
+        <xs:complexType>
+          <xs:sequence>
+	
+    </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Pb_PingRequest">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" nillable="true" maxOccurs="1" name="Value" type="xs:string"/>
+            <xs:element minOccurs="0" nillable="true" maxOccurs="1" name="SleepTimeMs" type="xs:int"/>
+            <xs:element minOccurs="0" nillable="true" maxOccurs="1" name="ErrorCodeReturned" type="xs:unsignedInt"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Pb_PingResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" nillable="true" maxOccurs="1" name="Value" type="xs:string"/>
+            <xs:element minOccurs="0" nillable="true" maxOccurs="1" name="Counter" type="xs:int"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Ticker_TimeRequest">
+        <xs:complexType>
+          <xs:sequence>
+            <!-- интервал обновления (сек) -->
+            <xs:element minOccurs="0" nillable="true" maxOccurs="1" name="Every" type="xs:int"/>
+            <!-- количество ответов -->
+            <xs:element minOccurs="0" nillable="true" maxOccurs="1" name="Max" type="xs:int"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="Ticker_TimeResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" nillable="true" maxOccurs="1" name="Ts" type="xs:dateTime"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:schema>
+  </types>
+  <message name="error">
+    <part element="types:exception" name="error"/>
+  </message>
+  <message name="Pb_PingRequest">
+    <part element="types:Pb_PingRequest" name="input"/>
+  </message>
+  <message name="Pb_PingResponse">
+    <part element="types:Pb_PingResponse" name="output"/>
+  </message>
+  <message name="Pb_Empty">
+    <part element="types:Pb_Empty" name="input"/>
+  </message>
+  <message name="Pb_PingResponse">
+    <part element="types:Pb_PingResponse" name="output"/>
+  </message>
+  <message name="Pb_PingRequest">
+    <part element="types:Pb_PingRequest" name="input"/>
+  </message>
+  <message name="Pb_Empty">
+    <part element="types:Pb_Empty" name="output"/>
+  </message>
+  <message name="Pb_PingRequest">
+    <part element="types:Pb_PingRequest" name="input"/>
+  </message>
+  <message name="Pb_PingResponse">
+    <part element="types:Pb_PingResponse" name="output"/>
+  </message>
+  <message name="Ticker_TimeRequest">
+    <part element="types:Ticker_TimeRequest" name="input"/>
+  </message>
+  <message name="Ticker_TimeResponse">
+    <part element="types:Ticker_TimeResponse" name="output"/>
+  </message>
+  <portType name="PingService">
+    <operation name="Ping">
+      <input message="tns:Pb_PingRequest"/>
+      <output message="tns:Pb_PingResponse"/>
+      <fault message="tns:error" name="error"/>
+    </operation>
+    <operation name="PingEmpty">
+      <input message="tns:Pb_Empty"/>
+      <output message="tns:Pb_PingResponse"/>
+      <fault message="tns:error" name="error"/>
+    </operation>
+    <operation name="PingError">
+      <input message="tns:Pb_PingRequest"/>
+      <output message="tns:Pb_Empty"/>
+      <fault message="tns:error" name="error"/>
+    </operation>
+    <operation name="PingList">
+      <input message="tns:Pb_PingRequest"/>
+      <output message="tns:Pb_PingResponse"/>
+      <fault message="tns:error" name="error"/>
+    </operation>
+    <operation name="TimeService">
+      <input message="tns:Ticker_TimeRequest"/>
+      <output message="tns:Ticker_TimeResponse"/>
+      <fault message="tns:error" name="error"/>
+    </operation>
+  </portType>
+  <binding name="PingService_soap" type="tns:PingService">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="Ping">
+      <soap:operation soapAction="http://main.proto/PingService/Ping" style="document"/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+      <output>
+        <soap:body use="literal"/>
+      </output>
+      <fault name="error">
+        <soap:fault name="error" use="literal"/>
+      </fault>
+    </operation>
+    <operation name="PingEmpty">
+      <soap:operation soapAction="http://main.proto/PingService/PingEmpty" style="document"/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+      <output>
+        <soap:body use="literal"/>
+      </output>
+      <fault name="error">
+        <soap:fault name="error" use="literal"/>
+      </fault>
+    </operation>
+    <operation name="PingError">
+      <soap:operation soapAction="http://main.proto/PingService/PingError" style="document"/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+      <output>
+        <soap:body use="literal"/>
+      </output>
+      <fault name="error">
+        <soap:fault name="error" use="literal"/>
+      </fault>
+    </operation>
+    <operation name="PingList">
+      <soap:operation soapAction="http://main.proto/PingService/PingList" style="document"/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+      <output>
+        <soap:body use="literal"/>
+      </output>
+      <fault name="error">
+        <soap:fault name="error" use="literal"/>
+      </fault>
+    </operation>
+    <operation name="TimeService">
+      <documentation><![CDATA[ Время на сервере&#xA;]]></documentation>
+      <soap:operation soapAction="http://main.proto/PingService/TimeService" style="document"/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+      <output>
+        <soap:body use="literal"/>
+      </output>
+      <fault name="error">
+        <soap:fault name="error" use="literal"/>
+      </fault>
+    </operation>
+  </binding>
+  <service name="PingService__service">
+    <port binding="tns:PingService_soap" name="PingService">
+      
+    </port>
+  </service>
+</definitions>

@@ -252,6 +252,14 @@
             "required": true,
             "type": "integer",
             "format": "int32"
+          },
+          {
+            "name": "max",
+            "description": "количество ответов.",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
           }
         ],
         "tags": [

@@ -24,18 +24,18 @@
 ```
 ├── docker-compose.yml
 ├── Dockerfile
-├── go.mod
+├── go.mod - в текущей версии требует установки в соседнем каталоге [rpckit](github.com/TenderPro/rpckit)
 ├── main.go
-├── main.proto
+├── main.proto - описание сервиса
 ├── Makefile
 ├── pkg
-│   ├── app
+│   ├── app - сборка сервиса из компонентов
 │   ├── nrpcgen
 │   ├── pb
-│   ├── service
+│   ├── service - прикладная часть сервиса
 │   ├── soapgen
 │   ├── staticgen
-│   └── template
+│   └── template - работа с шаблонами
 ├── README.md
 └── static
     ├── html
@@ -46,7 +46,7 @@
 
 ## Описание реализации
 
-Для сборки проекта использовался go версии 1.14. Результат вызова `protoc`, файл api.pb.go, включен в проект и эта зависимость будет нужна только в случае изменения api.proto.
+Для сборки проекта используется go версии 1.14. По описанию сервиса, [main.proto](main.proto), автогенерится код поддержки NATS-RPC, OpenAPI, SOAP документация (в каталоги pkg/*gen и pkg/pb). Содержимое каталога `static` командой `make gen-prod` переностится в пакет `pkg/staticgen`.
 
 Команда сборки сервиса: `go build .`
 
@@ -102,11 +102,12 @@ make up
 
 ## TODO
 
+* [x] ping.Timeservice
+* [x] актуализировать примеры в static/html и тесты в Makefile
 * [ ] актуализировать README
-* [ ] ping.Timeservice
-* [ ] актуализировать примеры в static/html и тесты в Makefile
 * [ ] pkg/app.Run - что еще вынести в rpckit?
 * [ ] пример вызова метода из шаблонов
+* [ ] gRPC: возврат ошибок
 * [ ] nrpc: трейсинг
 * [ ] nrpc: protoc-gen (fork)
 * [ ] pgmig: пример работы с БД

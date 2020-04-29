@@ -2,6 +2,7 @@
 // sources:
 // static/README.md
 // static/html/devel/api.html
+// static/html/devel/api.wsdl
 // static/html/devel/index.html
 // static/html/devel/js/opentracing-browser.min.js
 // static/html/devel/js/ws.js
@@ -60,6 +61,24 @@ func readmeMd() (*asset, error) {
 func htmlDevelApiHtml() (*asset, error) {
 	path := "/home/jean/Private/tpro/GitHub/rpc-sample-app/static/html/devel/api.html"
 	name := "html/devel/api.html"
+	bytes, err := bindataRead(path, name)
+	if err != nil {
+		return nil, err
+	}
+
+	fi, err := os.Stat(path)
+	if err != nil {
+		err = fmt.Errorf("Error reading asset info %s at %s: %v", name, path, err)
+	}
+
+	a := &asset{bytes: bytes, info: fi}
+	return a, err
+}
+
+// htmlDevelApiWsdl reads file data from disk. It returns an error on failure.
+func htmlDevelApiWsdl() (*asset, error) {
+	path := "/home/jean/Private/tpro/GitHub/rpc-sample-app/static/html/devel/api.wsdl"
+	name := "html/devel/api.wsdl"
 	bytes, err := bindataRead(path, name)
 	if err != nil {
 		return nil, err
@@ -308,6 +327,7 @@ func AssetNames() []string {
 var _bindata = map[string]func() (*asset, error){
 	"README.md": readmeMd,
 	"html/devel/api.html": htmlDevelApiHtml,
+	"html/devel/api.wsdl": htmlDevelApiWsdl,
 	"html/devel/index.html": htmlDevelIndexHtml,
 	"html/devel/js/opentracing-browser.min.js": htmlDevelJsOpentracingBrowserMinJs,
 	"html/devel/js/ws.js": htmlDevelJsWsJs,
@@ -364,6 +384,7 @@ var _bintree = &bintree{nil, map[string]*bintree{
 	"html": &bintree{nil, map[string]*bintree{
 		"devel": &bintree{nil, map[string]*bintree{
 			"api.html": &bintree{htmlDevelApiHtml, map[string]*bintree{}},
+			"api.wsdl": &bintree{htmlDevelApiWsdl, map[string]*bintree{}},
 			"index.html": &bintree{htmlDevelIndexHtml, map[string]*bintree{}},
 			"js": &bintree{nil, map[string]*bintree{
 				"opentracing-browser.min.js": &bintree{htmlDevelJsOpentracingBrowserMinJs, map[string]*bintree{}},

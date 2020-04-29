@@ -30,8 +30,8 @@ function sendForm(form) {
     case "echo":
       var div = divFactory.get("echo");
       div.innerHTML = '';
-      openStream("example/echo/stream", arg, false, function(data){
-        div.innerHTML += "<br>" + data.result.message;
+      openStream("sample/ping/list", arg, false, function(data){
+        div.innerHTML += "<br>" + data.result.counter+": "+data.result.Value;
       });
       break;
     default:

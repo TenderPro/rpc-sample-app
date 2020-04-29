@@ -90,7 +90,7 @@ func Run(version string, exitFunc func(code int)) {
 		if cfg.UseNRPC() {
 			log.Info("Start NATS handler")
 			pool := nrpc.NewWorkerPool(context.Background(), 200, 5, 4*time.Second)
-			h := nrpcgen.NewPingServiceConcurrentHandler(pool, nc, service.New(cfg.Service, log, cfg.TickerSubject, cfg.Trace.Name))
+			h := nrpcgen.NewPingServiceConcurrentHandler(pool, nc, service.New(cfg.Service, log, nc, cfg.TickerSubject, cfg.Trace.Name))
 
 			log.Info("NATS subscriber", zap.String("subject", h.Subject()))
 			sub, err = nc.Subscribe(h.Subject(), h.Handler)
@@ -113,7 +113,7 @@ func Run(version string, exitFunc func(code int)) {
 			pb.RegisterPingServiceServer(grpcService.Server, client)
 		} else {
 			log.Info("Start gRPC Native service")
-			pb.RegisterPingServiceServer(grpcService.Server, service.New(cfg.Service, log, cfg.TickerSubject, cfg.Trace.Name))
+			pb.RegisterPingServiceServer(grpcService.Server, service.New(cfg.Service, log, nc, cfg.TickerSubject, cfg.Trace.Name))
 		}
 		group.Go(func() error {
 			<-gctx.Done()

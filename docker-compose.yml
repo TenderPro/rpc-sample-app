@@ -41,6 +41,8 @@ services:
       - /etc/localtime:/etc/localtime:ro
     build:
       context: .
+      args:
+       - GOPROXY
     networks:
        - app-network
 

@@ -27,7 +27,7 @@ require (
 	github.com/jinzhu/gorm v1.9.10
 	github.com/mwitkow/go-proto-validators v0.3.0
 	github.com/nats-io/gnatsd v1.4.1
-	github.com/nats-io/go-nats v1.7.2 // indirect
+	github.com/nats-io/go-nats v1.7.2
 	github.com/nats-io/nats-server/v2 v2.1.6 // indirect
 	github.com/nats-io/nats.go v1.9.2
 	github.com/nats-rpc/nrpc v0.0.0-20190920042445-3ae2c6c6aad4

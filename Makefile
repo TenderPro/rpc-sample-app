@@ -94,10 +94,11 @@ gen:
   -v $$PWD/../rpckit:/usr/local/include/github.com/TenderPro/rpckit \
   tenderpro/protoc-go -I=. \
     --gogofast_out=plugins=grpc,\
-Mgoogle/protobuf/timestamp.proto=github.com/gogo/protobuf/types:pkg/pb \
+Mgoogle/protobuf/timestamp.proto=github.com/gogo/protobuf/types,\
+Mgoogle/protobuf/empty.proto=github.com/gogo/protobuf/types:\
+pkg/pb/ \
     --grpc-gateway_out=logtostderr=true:pkg/pb \
     --govalidators_out="lang=go:pkg/pb" \
-    --nrpc_out=plugins=prometheus:pkg/nrpcgen \
     --swagger_out=logtostderr=true,allow_merge=true,merge_file_name=api:static/html/devel/openapi/ \
     --wsdl_out=soapgen:pkg/soapgen \
     --grpcer_out=soapgen:pkg/soapgen \
@@ -107,9 +108,13 @@ Mgoogle/protobuf/timestamp.proto=github.com/gogo/protobuf/types:pkg/pb \
 	sed -i.bak 's|pb "."|pb "SELF/pkg/pb"|' pkg/soapgen/main.grpcer.go
 	cat pkg/soapgen/main.wsdl > static/html/devel/api.wsdl 
 	rm -f pkg/soapgen/main.wsdl
-	gofmt pkg/nrpcgen/main.nrpc.go > pkg/nrpcgen/main.nrpc.go.orig
-	rm -f pkg/nrpcgen/main.nrpc.go
-	rm -f static/html/devel/api.wsdl
+	if [ -f pkg/nrpcgen/main.nrpc.go ] ; then gofmt pkg/nrpcgen/main.nrpc.go > pkg/nrpcgen/main.nrpc.go.orig && rm -f pkg/nrpcgen/main.nrpc.go ; fi
+
+#	rm -f static/html/devel/api.wsdl
+
+# TODO:
+#     --nrpc_out=plugins=prometheus:pkg/nrpcgen \
+
 
 gen-prod: gen ## Generate files for production
 	go-bindata -pkg static -prefix $PWD/static -o pkg/static/bindata.go static/...
@@ -120,9 +125,9 @@ gen-dev: ## Generate files for development
 
 
 dep: ## Get the dependencies
-	@go get -v -d ./...
+	@go mod download
 
-build: dep ## Build the binary file for server
+build: dep gen gen-dev ## Build the binary file for server
 	@go build -i -v -tags dev .
 
 run: ## Build and run binary
@@ -143,6 +148,9 @@ t-ping:
 
 t-stream:
 	curl http://localhost:8081/v1/sample/ping/list/string88
+
+t-time:
+	curl http://localhost:8081/v1/time/5
 
 ## Run tests and fill coverage.out
 cov: coverage.out

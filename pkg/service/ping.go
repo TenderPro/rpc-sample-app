@@ -11,10 +11,12 @@ import (
 	"time"
 
 	"github.com/TenderPro/rpckit/app/ticker"
+	"github.com/nats-io/nats.go"
 	opentracing "github.com/opentracing/opentracing-go"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	"SELF/pkg/pb"
 )
@@ -33,11 +35,13 @@ type Service struct {
 	cfg        Config
 	subject    string
 	spanPrefix string
+	ticker     *ticker.Service
 	log        *zap.Logger
 }
 
-func New(cfg Config, log *zap.Logger, subject, prefix string) *Service {
-	return &Service{cfg: cfg, log: log, subject: subject, spanPrefix: prefix}
+func New(cfg Config, log *zap.Logger, nc *nats.Conn, subject, prefix string) *Service {
+	tick := ticker.New(log, nc, subject)
+	return &Service{cfg: cfg, log: log, subject: subject, spanPrefix: prefix, ticker: tick}
 }
 
 func (srv Service) PingEmpty(ctx context.Context, _ *pb.Empty) (*pb.PingResponse, error) {
@@ -48,7 +52,7 @@ func (srv Service) PingEmpty(ctx context.Context, _ *pb.Empty) (*pb.PingResponse
 		span.LogKV("event", "service.ping.empty")
 		span.Finish()
 	}
-	return &pb.PingResponse{Value: DefaultResponseValue, Counter: 42}, nil
+	return &pb.PingResponse{Value: DefaultResponseValue, Counter: 43}, nil
 }
 
 func (srv Service) Ping(ctx context.Context, ping *pb.PingRequest) (*pb.PingResponse, error) {
@@ -75,7 +79,7 @@ func (srv Service) PingError(ctx context.Context, ping *pb.PingRequest) (*pb.Emp
 		span.LogKV("event", "service.ping.error", "code", code)
 		span.Finish()
 	}
-	return nil, grpc.Errorf(code, "Userspace error.")
+	return nil, status.Error(code, "Userspace error.")
 }
 
 func (srv Service) PingList(ping *pb.PingRequest, stream pb.PingService_PingListServer) error {
@@ -125,5 +129,5 @@ func (srv Service) PingStream(stream pb.PingService_PingStreamServer) error {
 
 // TimeService is a gRPC service for ticker
 func (srv Service) TimeService(in *ticker.TimeRequest, stream pb.PingService_TimeServiceServer) error {
-	return nil
+	return srv.ticker.TimeService(in, stream)
 }
