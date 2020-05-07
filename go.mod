@@ -4,9 +4,11 @@ go 1.14
 
 replace SELF => ./
 
+// replace github.com/TenderPro/rpckit => ../rpckit
+
 require (
 	SELF v0.0.0-00010101000000-000000000000
-	github.com/TenderPro/rpckit v0.1.0 // indirect
+	github.com/TenderPro/rpckit v0.1.1 // indirect
 	github.com/UNO-SOFT/grpcer v0.4.5
 	github.com/gogo/protobuf v1.3.1
 	github.com/golang/protobuf v1.4.0
@@ -25,4 +27,5 @@ require (
 	golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543
 	google.golang.org/genproto v0.0.0-20200423170343-7949de9c1215
 	google.golang.org/grpc v1.29.1
+	grpc.go4.org v0.0.0-20170609214715-11d0a25b4919
 )

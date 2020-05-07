@@ -11,6 +11,7 @@ import (
 	"github.com/nats-io/nats.go"
 	"github.com/nats-rpc/nrpc"
 	"github.com/prometheus/client_golang/prometheus"
+	grpc "google.golang.org/grpc"
 
 	opentracing "github.com/opentracing/opentracing-go"
 
@@ -237,41 +238,39 @@ func (h *PingServiceHandler) Handler(msg *nats.Msg) {
 				"PingList", request.Encoding, "unmarshal_fail").Inc()
 		} else {
 			request.EnableStreamedReply()
-			/*
-				request.Handler = func(ctx context.Context) (proto.Message, error) {
-					err := h.server.PingList(ctx, req, func(rep PingResponse) {
-						request.SendStreamReply(&rep)
-					})
-					return nil, err
-				}
-			*/
-		}
-	case "PingStream":
-		_, request.Encoding, err = nrpc.ParseSubjectTail(0, request.SubjectTail)
-		if err != nil {
-			log.Printf("PingStreamHanlder: PingStream subject parsing failed: %v", err)
-			break
-		}
-		var req pb.PingRequest
-		if err = nrpc.Unmarshal(request.Encoding, msg.Data, &req); err != nil {
-			log.Printf("PingStreamHandler: PingStream request unmarshal failed: %v", err)
-			immediateError = &nrpc.Error{
-				Type:    nrpc.Error_CLIENT,
-				Message: "bad request received: " + err.Error(),
+			es := pingServiceStreamingPingListServer{}
+			es.request = request
+			request.Handler = func(ctx context.Context) (proto.Message, error) {
+				err = h.server.PingList(&req, es)
+				return nil, err
 			}
-			serverRequestsForPingService.WithLabelValues(
-				"PingStream", request.Encoding, "unmarshal_fail").Inc()
-		} else {
-			request.EnableStreamedReply()
-			/*
-				request.Handler = func(ctx context.Context) (proto.Message, error) {
-					err := h.server.PingStream(ctx, req, func(rep PingResponse) {
-						request.SendStreamReply(&rep)
-					})
-					return nil, err
-				}
-			*/
 		}
+		/*
+			case "PingStream":
+				_, request.Encoding, err = nrpc.ParseSubjectTail(0, request.SubjectTail)
+				if err != nil {
+					log.Printf("PingStreamHanlder: PingStream subject parsing failed: %v", err)
+					break
+				}
+				var req pb.PingRequest
+				if err = nrpc.Unmarshal(request.Encoding, msg.Data, &req); err != nil {
+					log.Printf("PingStreamHandler: PingStream request unmarshal failed: %v", err)
+					immediateError = &nrpc.Error{
+						Type:    nrpc.Error_CLIENT,
+						Message: "bad request received: " + err.Error(),
+					}
+					serverRequestsForPingService.WithLabelValues(
+						"PingStream", request.Encoding, "unmarshal_fail").Inc()
+				} else {
+					request.EnableStreamedReply()
+					es := pingServiceStreamingPingStreamServer{}
+					es.request = request
+					request.Handler = func(ctx context.Context) (proto.Message, error) {
+						err = h.server.PingStream(&req, es)
+						return nil, err
+					}
+				}
+		*/
 	case "TimeService":
 		_, request.Encoding, err = nrpc.ParseSubjectTail(0, request.SubjectTail)
 		if err != nil {
@@ -289,14 +288,12 @@ func (h *PingServiceHandler) Handler(msg *nats.Msg) {
 				"TimeService", request.Encoding, "unmarshal_fail").Inc()
 		} else {
 			request.EnableStreamedReply()
-			/*
-				request.Handler = func(ctx context.Context) (proto.Message, error) {
-					err := h.server.TimeService(ctx, req, func(rep TimeResponse) {
-						request.SendStreamReply(&rep)
-					})
-					return nil, err
-				}
-			*/
+			es := pingServiceStreamingTimeServiceServer{}
+			es.request = request
+			request.Handler = func(ctx context.Context) (proto.Message, error) {
+				err = h.server.TimeService(&req, es)
+				return nil, err
+			}
 		}
 	default:
 		log.Printf("PingServiceHandler: unknown name %q", name)
@@ -345,6 +342,43 @@ func (h *PingServiceHandler) Handler(msg *nats.Msg) {
 			request.Elapsed().Seconds())
 	} else {
 	}
+}
+
+type pingServiceStreamingPingListServer struct {
+	grpc.ServerStream
+	request *nrpc.Request
+}
+
+func (x pingServiceStreamingPingListServer) Send(m *pb.PingResponse) error {
+	x.request.SendStreamReply(m)
+	return nil
+}
+func (x pingServiceStreamingPingListServer) Context() context.Context {
+	return x.request.StreamContext
+}
+
+/*
+type pingServiceStreamingPingStreamServer struct {
+	grpc.ServerStream
+	request *nrpc.Request
+}
+
+func (x pingServiceStreamingPingStreamServer) Send(m *pb.PingResponse) error {
+	x.request.SendStreamReply(m)
+	return nil
+}
+*/
+type pingServiceStreamingTimeServiceServer struct {
+	grpc.ServerStream
+	request *nrpc.Request
+}
+
+func (x pingServiceStreamingTimeServiceServer) Send(m *ticker.TimeResponse) error {
+	x.request.SendStreamReply(m)
+	return nil
+}
+func (x pingServiceStreamingTimeServiceServer) Context() context.Context {
+	return x.request.StreamContext
 }
 
 type PingServiceClient struct {
@@ -456,7 +490,11 @@ func (c *PingServiceClient) PingList(
 		if err != nil {
 			break
 		}
-		//cb(ctx, res)
+		err = stream.Send(&res)
+		if err != nil {
+			log.Printf("> call send error %v\n", err)
+			break
+		}
 	}
 	if err == nrpc.ErrEOS {
 		err = nil
@@ -490,7 +528,11 @@ func (c *PingServiceClient) PingStream(
 		if err != nil {
 			break
 		}
-		//cb(ctx, res)
+		err = stream.Send(&res)
+		if err != nil {
+			log.Printf("> call send error %v\n", err)
+			break
+		}
 	}
 	if err == nrpc.ErrEOS {
 		err = nil
@@ -523,7 +565,11 @@ func (c *PingServiceClient) TimeService(
 		if err != nil {
 			break
 		}
-		//	cb(ctx, res)
+		err = stream.Send(&res)
+		if err != nil {
+			log.Printf("> call send error %v\n", err)
+			break
+		}
 	}
 	if err == nrpc.ErrEOS {
 		err = nil

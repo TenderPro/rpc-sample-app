@@ -29,6 +29,8 @@ github.com/TenderPro/rpckit v0.0.0-20200429224600-e98621f3d5ae h1:qex1BBuCkC27Qy
 github.com/TenderPro/rpckit v0.0.0-20200429224600-e98621f3d5ae/go.mod h1:SbnWYH3oXjDtjU0CoknHVOkqBw/3PkHgxxmv9BpfZlI=
 github.com/TenderPro/rpckit v0.1.0 h1:fytdoQJzleZKF7AC5zscxzyJ7/VSPifn9OY9c18YmdY=
 github.com/TenderPro/rpckit v0.1.0/go.mod h1:SbnWYH3oXjDtjU0CoknHVOkqBw/3PkHgxxmv9BpfZlI=
+github.com/TenderPro/rpckit v0.1.1 h1:uhquEPKd43dbSHayzAt+Kz6rsQ1/Zy07MihuPkJI8Cs=
+github.com/TenderPro/rpckit v0.1.1/go.mod h1:SbnWYH3oXjDtjU0CoknHVOkqBw/3PkHgxxmv9BpfZlI=
 github.com/UNO-SOFT/grpcer v0.4.5 h1:fof8hqD7RjN9L8KiYbz+h9inHkPyvXOooegS9VPMxsU=
 github.com/UNO-SOFT/grpcer v0.4.5/go.mod h1:dT+UlfZ9JAxmpUj70d/IS78bc3AoGF6cQrJiqCh4bWo=
 github.com/UNO-SOFT/soap-proxy v0.8.3 h1:4i0c2sOzXjOQLWvDuEngnPKRGIZZzWLiHgu0ilkbdzk=
@@ -640,6 +642,7 @@ gopkg.in/yaml.v2 v2.2.3/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
 gopkg.in/yaml.v2 v2.2.4/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
 gopkg.in/yaml.v2 v2.2.5 h1:ymVxjfMaHvXD8RqPRmzHHsB3VvucivSkIAvJFDI5O3c=
 gopkg.in/yaml.v2 v2.2.5/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
+grpc.go4.org v0.0.0-20170609214715-11d0a25b4919 h1:tmXTu+dfa+d9Evp8NpJdgOy6+rt8/x4yG7qPBrtNfLY=
 grpc.go4.org v0.0.0-20170609214715-11d0a25b4919/go.mod h1:77eQGdRu53HpSqPFJFmuJdjuHRquDANNeA4x7B8WQ9o=
 honnef.co/go/js/dom v0.0.0-20160310112645-24aa052bc5c6/go.mod h1:sUMDUKNB2ZcVjt92UnLy3cdGs+wDAcrPdV3JP6sVgA4=
 honnef.co/go/tools v0.0.0-20180728063816-88497007e858/go.mod h1:rf3lG4BRIbNafJWhAfAdb/ePZxsR/4RtNHQocxwk9r4=

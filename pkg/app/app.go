@@ -75,6 +75,8 @@ func Run(version string, exitFunc func(code int)) {
 	defer cancel()
 
 	var nc *nats.Conn
+	log.Debug("Connecting to MQ")
+
 	for {
 		nc, err = nats.Connect(cfg.MQ, nats.Timeout(5*time.Second))
 		if err == nil {
@@ -82,6 +84,7 @@ func Run(version string, exitFunc func(code int)) {
 		}
 		time.Sleep(time.Second)
 	}
+	log.Debug("MQ connected")
 	var sub *nats.Subscription
 
 	group, gctx := errgroup.WithContext(ctx)
@@ -93,7 +96,8 @@ func Run(version string, exitFunc func(code int)) {
 		})
 		if cfg.UseNRPC() {
 			log.Info("Start NATS handler")
-			pool := nrpc.NewWorkerPool(context.Background(), 200, 5, 4*time.Second)
+			// size uint, 	maxPending uint, maxPendingDuration
+			pool := nrpc.NewWorkerPool(context.Background(), 200, 100, 4*time.Second)
 			h := nrpcgen.NewPingServiceConcurrentHandler(pool, nc, service.New(cfg.Service, log, nc, cfg.TickerSubject, cfg.Trace.Name))
 
 			log.Info("NATS subscriber", zap.String("subject", h.Subject()))

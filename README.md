@@ -105,6 +105,7 @@ make up
 * [x] ping.Timeservice
 * [x] актуализировать примеры в static/html и тесты в Makefile
 * [x] деплой docker/dcape
+* [x] nrpc: руками сделать работающую версию
 * [ ] актуализировать README
 * [ ] pkg/app.Run - что еще вынести в rpckit?
 * [ ] пример вызова метода из шаблонов

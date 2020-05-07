@@ -77,7 +77,7 @@ service PingService {
   }
 
   /*
-  SOAP does not support client streaming
+  SOAP does not support client streaming, so skip it
   rpc PingStream(stream PingRequest) returns (stream PingResponse) {
     option (google.api.http) = {
       post: "/v1/sample/ping/stream"

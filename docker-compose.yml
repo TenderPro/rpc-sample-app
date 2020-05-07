@@ -6,17 +6,13 @@ version: '3.4'
 services:
   app:
     image: ${APP_IMAGE}
-    command: mono --debug --trace.host log --mq_url nats:4222 --host ${APP_SITE}
-#    ports:
-#      - "8081:8081"
+    command: ${APP_MODE} --debug --trace.host log --mq_url nats:4222 --host ${APP_SITE}
     labels:
       - "traefik.enable=true"
       - "traefik.frontend.rule=Host:${APP_SITE}"
     volumes:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
-#    depends_on:
-#      - nats
     build:
       context: .
       args:
@@ -34,6 +30,13 @@ services:
 #      - "traefik.frontend.rule=Host:${APP_SITE};PathPrefixStrip:/dev/jaeger"
       - "traefik.frontend.rule=Host:jaeger.${APP_SITE}"
       - "traefik.port=16686"
+    networks:
+      - app-network
+
+  log-local:
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - "6831:6831/udp"
     networks:
       - app-network
 

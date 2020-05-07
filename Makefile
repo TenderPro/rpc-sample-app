@@ -17,7 +17,8 @@ VERSION       ?= $(shell git describe --tags --always)
 # Site host
 APP_SITE      ?= $(PRG).dev.lan
 
-#APP_PORT      ?= 7070
+# App run mode (mono/bus/..)
+APP_MODE      ?= bus
 
 #PGHOST        ?= localhost
 #PGPORT        ?= 5432
@@ -59,6 +60,9 @@ define CONFIG_DEFAULT
 
 # Site host
 APP_SITE=$(APP_SITE)
+
+# App run mode (mono/bus/..)
+APP_MODE=$(APP_MODE)
 
 # Docker image tag
 APP_IMAGE=$(APP_IMAGE)
@@ -137,7 +141,7 @@ build: dep gen gen-dev ## Build the binary file for server
 	@go build -i -v -tags dev .
 
 run: ## Build and run binary
-	@go run -tags dev . -- mono --debug --mq_url localhost:4222
+	@go run -tags dev . -- $(APP_MODE) --debug --mq_url localhost:4222
 
 # --db.addr=localhost:5432 --addr=localhost:${APP_PORT} \
 #	--db.name=${PGDATABASE} --db.user=${PGUSER} --db.password=${PGPASSWORD}
@@ -193,6 +197,10 @@ up-db: ## Start pg container only
 up-db: CMD=up -d db
 up-db: dc
 
+up-serv: ## Start service containers
+up-serv: CMD=up -d log-local nats-local
+up-serv: dc
+
 down: ## Stop containers and remove them
 down: CMD=rm -f -s
 down: dc
@@ -245,7 +253,7 @@ dcape-start-hook: dcape-db-create reup
 
 dcape-stop: down
 
-clean-docker:
+clean-docker: down
 		docker rmi $(APP_IMAGE)
 
 # ------------------------------------------------------------------------------
