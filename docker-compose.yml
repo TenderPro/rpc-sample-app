@@ -1,44 +1,22 @@
 # This file used by make for docker-composer container operations
 # including docker image build
 
-version: '2.1'
+version: '3.4'
 
 services:
-  db:
-    image: postgres:11.4
-    volumes:
-      - /etc/timezone:/etc/timezone:ro
-      - /etc/localtime:/etc/localtime:ro
-      - ./var/data:/var/lib/postgresql/data/
-      - ./sql:/docker-entrypoint-initdb.d/
-    ports:
-      - 15432:5432
-    environment:
-      - POSTGRES_DB=${PGDATABASE}
-      - POSTGRES_USER=${PGUSER}
-      - POSTGRES_PASSWORD=${PGPASSWORD}
-    healthcheck:
-      test: ["CMD", "pg_isready", "-q", "-U", "${PGUSER}", "-h", "db"]
-      interval: 2s
-      timeout: 3s
-      retries: 10
-    stop_grace_period: 5s
-    stop_signal: SIGINT
-    networks:
-       - app-network
-
   app:
     image: ${APP_IMAGE}
-    depends_on:
-      db:
-        condition: service_healthy
-    command:
-      --addr=:7070 --db.addr=db:5432 --db.name=${PGDATABASE} --db.user=${PGUSER} --db.password=${PGPASSWORD}
-    ports:
-      - "${APP_PORT:-7070}:7070"
+    command: mono --debug --trace.host log --mq_url nats:4222 --host ${APP_SITE}
+#    ports:
+#      - "8081:8081"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.frontend.rule=Host:${APP_SITE}"
     volumes:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
+#    depends_on:
+#      - nats
     build:
       context: .
       args:
@@ -46,7 +24,84 @@ services:
     networks:
        - app-network
 
+  log:
+    image: jaegertracing/all-in-one:latest
+#    ports:
+#      - "6831:6831/udp"
+#      - "16686:16686"
+    labels:
+      - "traefik.enable=true"
+#      - "traefik.frontend.rule=Host:${APP_SITE};PathPrefixStrip:/dev/jaeger"
+      - "traefik.frontend.rule=Host:jaeger.${APP_SITE}"
+      - "traefik.port=16686"
+    networks:
+      - app-network
+
+  nats:
+    image: nats-streaming:0.17.0-linux
+    restart: always
+#    ports:
+      # The standard MQ protocol port
+#      - 4222:4222
+      # HTTP management UI
+#      - 8222:8222
+    labels:
+      - "traefik.enable=true"
+#      - "traefik.frontend.rule=Host:${APP_SITE};PathPrefixStrip:/dev/nats"
+      - "traefik.frontend.rule=Host:nats.${APP_SITE}"
+      - "traefik.port=8222"
+    networks:
+       - app-network
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+#    healthcheck:
+#        test: ["CMD", "curl", "-f", "http://localhost:8222"]
+#        interval: 30s
+#        timeout: 10s
+#        retries: 5
+
+  nats-local:
+    image: nats-streaming:0.17.0-linux
+    restart: always
+    ports:
+      # The standard MQ protocol port
+      - 4222:4222
+      # HTTP management UI
+      - 8222:8222
+    networks:
+       - app-network
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+
+  # db service does not used yet
+#  db:
+#    image: postgres:11.4
+#    volumes:
+#      - /etc/timezone:/etc/timezone:ro
+#      - /etc/localtime:/etc/localtime:ro
+#      - ./var/data:/var/lib/postgresql/data/
+#      - ./sql:/docker-entrypoint-initdb.d/
+#    ports:
+#      - 15432:5432
+#    environment:
+#      - POSTGRES_DB=${PGDATABASE}
+#      - POSTGRES_USER=${PGUSER}
+#      - POSTGRES_PASSWORD=${PGPASSWORD}
+#    healthcheck:
+#      test: ["CMD", "pg_isready", "-q", "-U", "${PGUSER}", "-h", "db"]
+#      interval: 2s
+#      timeout: 3s
+#      retries: 10
+#    stop_grace_period: 5s
+#    stop_signal: SIGINT
+#    networks:
+#       - app-network
+
+
+
 networks:
   app-network:
-    driver: bridge
-
+    external:
+      name: ${DOCKER_NET}

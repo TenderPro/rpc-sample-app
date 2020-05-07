@@ -1,12 +1,12 @@
 
-FROM golang:1.14.0-alpine3.11
+FROM golang:1.14.0-alpine3.11 as builder
 
 # Speed up build if proxy given
 ARG GOPROXY
 RUN echo $GOPROXY
 
 WORKDIR /opt/app
-RUN apk --update add curl git
+RUN apk --update add curl git make gcc libc-dev
 
 # Cached layer
 COPY ./go.mod ./go.sum ./
@@ -24,5 +24,7 @@ WORKDIR /opt/app
 
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /opt/app/app /usr/bin/app
+
+EXPOSE 8081
 
 ENTRYPOINT ["/usr/bin/app"]

@@ -61,6 +61,7 @@ func Run(version string, exitFunc func(code int)) {
 	defer log.Sync()
 
 	log.Info(Application, zap.String("version", version))
+	log.Debug("Config", zap.Reflect("cfg", cfg))
 
 	tracer, closer, er := debug.New(cfg.Trace, log)
 	if er != nil {
@@ -74,10 +75,13 @@ func Run(version string, exitFunc func(code int)) {
 	defer cancel()
 
 	var nc *nats.Conn
-	if nc, err = nats.Connect(cfg.MQ, nats.Timeout(5*time.Second)); err != nil {
-		return
+	for {
+		nc, err = nats.Connect(cfg.MQ, nats.Timeout(5*time.Second))
+		if err == nil {
+			break
+		}
+		time.Sleep(time.Second)
 	}
-
 	var sub *nats.Subscription
 
 	group, gctx := errgroup.WithContext(ctx)
