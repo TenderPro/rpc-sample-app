@@ -120,19 +120,20 @@ pkg/pb/ \
 	rm -f pkg/soapgen/main.wsdl
 	if [ -f pkg/nrpcgen/main.nrpc.go ] ; then gofmt pkg/nrpcgen/main.nrpc.go > pkg/nrpcgen/main.nrpc.go.orig && rm -f pkg/nrpcgen/main.nrpc.go ; fi
 
+gen-st:
+	parcello -r -d static -b pkg/staticgen
+
 #	rm -f static/html/devel/api.wsdl
 
 # TODO:
 #     --nrpc_out=plugins=prometheus:pkg/nrpcgen \
 
+# TODO: gen mocks
 
-gen-prod: gen ## Generate files for production
-	go-bindata -pkg staticgen -prefix static -o pkg/staticgen/bindata.go static/...
-
-gen-dev: ## Generate files for development
-	go-bindata -debug -pkg staticgen -prefix static -o pkg/staticgen/bindata.go static/...
-	# TODO: mocks
-
+dep-dev: ## Get development deps
+	#go get github.com/kevinburke/go-bindata
+	go get -u github.com/phogolabs/parcello
+	go install github.com/phogolabs/parcello/cmd/parcello
 
 dep: ## Get the dependencies
 	@go mod download
@@ -141,7 +142,8 @@ build: dep gen gen-dev ## Build the binary file for server
 	@go build -i -v -tags dev .
 
 run: ## Build and run binary
-	@go run -tags dev . -- $(APP_MODE) --debug --mq_url localhost:4222
+	@PARCELLO_DEV_ENABLED=1 PARCELLO_RESOURCE_DIR=./static \
+	go run -tags dev . -- $(APP_MODE) --debug --mq_url localhost:4222
 
 # --db.addr=localhost:5432 --addr=localhost:${APP_PORT} \
 #	--db.name=${PGDATABASE} --db.user=${PGUSER} --db.password=${PGPASSWORD}

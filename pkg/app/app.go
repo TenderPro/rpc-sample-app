@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	muxer "github.com/gorilla/mux"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/nats-io/nats.go"
 	"github.com/nats-rpc/nrpc"
@@ -23,6 +24,7 @@ import (
 	"github.com/TenderPro/rpckit/grpc"
 	"github.com/TenderPro/rpckit/soap"
 	"github.com/TenderPro/rpckit/static"
+	"github.com/TenderPro/rpckit/template"
 
 	"SELF/pkg/nrpcgen"
 	"SELF/pkg/pb"
@@ -37,11 +39,12 @@ type Config struct {
 
 	TickerSubject string `long:"ticker_subject" default:"stream.time" description:"Ticker channel subject"`
 
-	Service service.Config `group:"Service Options" namespace:"srv"`
-	GRPC    grpc.Config    `group:"gRPC Options" namespace:"grpc"`
-	Static  static.Config  `group:"Static files Options" namespace:"html"`
-	SOAP    soap.Config    `group:"SOAP Options" namespace:"soap"`
-	Trace   debug.Config   `group:"Trace Options" namespace:"trace"`
+	Service  service.Config  `group:"Service Options" namespace:"srv"`
+	GRPC     grpc.Config     `group:"gRPC Options" namespace:"grpc"`
+	Static   static.Config   `group:"Static files Options" namespace:"html"`
+	Template template.Config `group:"Template files Options" namespace:"tmpl"`
+	SOAP     soap.Config     `group:"SOAP Options" namespace:"soap"`
+	Trace    debug.Config    `group:"Trace Options" namespace:"trace"`
 }
 
 // Application holds Application name for logging
@@ -145,13 +148,24 @@ func Run(version string, exitFunc func(code int)) {
 		}
 
 		// HTTP
-		mux := http.NewServeMux()
+		mux := muxer.NewRouter() //http.NewServeMux()
+
+		// Templates
+		tmplService, er := template.New(cfg.Template, log,
+			version,
+			cfg.Debug,
+			staticgen.FS("."),
+			gwm,
+		)
+		if er != nil {
+			err = er
+			return
+		}
+		tmplService.SetupRouter(mux, "/")
 
 		// Static
 		staticService := static.New(cfg.Static, log,
-			staticgen.AssetNames,
-			staticgen.Asset,
-			staticgen.AssetInfo,
+			staticgen.FS(cfg.Static.Prefix),
 		)
 		staticService.SetupRouter(mux)
 

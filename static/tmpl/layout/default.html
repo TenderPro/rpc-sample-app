@@ -1,0 +1,6 @@
+
+{{ if .Error }}{{ if not .Title }}{{ printf "Error %d: Sorry" .Status | .SetTitle }}{{ end }}{{ end -}}
+<title>{{ or .Title "Default title" }}</title>
+{{ if .Error }}{{ .Error }}
+{{ else}}=={{ content }}=={{ template "inc" . -}}
+{{ end -}}
